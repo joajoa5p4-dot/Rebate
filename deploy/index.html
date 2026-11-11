@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./ver2-seed-data.js"></script>
+<script src="./xlsx-lite.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 56"><rect width="120" height="56" fill="#1f6feb"/><text x="60" y="32" font-size="20" fill="#fff" text-anchor="middle" font-family="sans-serif">리베</text></svg></template>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  body { margin:0; background:#eef1f5; font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#1f6feb; text-decoration:none; }
+  a:hover { color:#134a9e; text-decoration:underline; }
+  input,select,button,textarea { font-family:inherit; }
+  input:focus,select:focus,textarea:focus { outline:2px solid #1f6feb; outline-offset:-1px; }
+  ::-webkit-scrollbar { width:11px; height:11px; }
+  ::-webkit-scrollbar-thumb { background:#c3ccd8; border-radius:6px; border:3px solid #eef1f5; }
+  @keyframes saveSpin { to { transform:rotate(360deg); } }
+  @keyframes noticeSlideUp { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+</style>
+<script>
+(function(){
+  // 스트리밍 렌더 중 이 helmet 스크립트가 두 번 실행되면 firebase가 두 번 로드되어
+  // Firestore 리스너가 중복 구독되고, suppressWrite 플래그 경쟁으로 read/write가 서로를
+  // 계속 트리거하는 무한 루프(화면 멈춤)가 생긴다. 전역 플래그로 1회만 초기화되게 막는다.
+  if (window.__rebateFirebaseBootedV2) return;
+  window.__rebateFirebaseBootedV2 = true;
+  function loadScript(src){
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  loadScript("https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js")
+    .then(function(){ return loadScript("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"); })
+    .then(function(){
+      var firebase_config = {
+        apiKey: "AIzaSyC5DobyB79Av-VlGNso91VZANo4YhFmyKQ",
+        authDomain: "eruda-sale-ver2.firebaseapp.com",
+        projectId: "eruda-sale-ver2",
+        storageBucket: "eruda-sale-ver2.firebasestorage.app",
+        messagingSenderId: "201266536988",
+        appId: "1:201266536988:web:f29ce331b40ae4d4cdb5d9"
+      };
+      var v2App = window.firebase.apps.some(function(a){ return a.name === "rebateV2"; })
+        ? window.firebase.app("rebateV2")
+        : window.firebase.initializeApp(firebase_config, "rebateV2");
+      window.__rebateDbV2 = v2App.firestore();
+    })
+    .catch(function(err){ console.error('Firebase load failed', err); });
+})();
+</script>
+</helmet>
+
+<sc-if value="{{ isLocked }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh; min-width:100%; background:#eef1f5; display:flex; align-items:center; justify-content:center; font-family:inherit">
+  <form onSubmit="{{ onSubmitPassword }}" style="background:#fff; border:1px solid #dfe4ec; border-radius:12px; padding:36px 40px; width:340px; display:flex; flex-direction:column; gap:16px; box-shadow:0 4px 24px rgba(20,30,50,.08)">
+    <div style="font-size:16px; font-weight:800; color:#1a2330; letter-spacing:-.3px">비밀번호를 입력하세요</div>
+    <input type="password" value="{{ pwInput }}" onChange="{{ onPwChange }}" autoFocus="{{ true }}" placeholder="비밀번호" style="border:1px solid #d3dae4; border-radius:7px; padding:10px 12px; font-size:14px; color:#1a2330"></input>
+    <sc-if value="{{ pwError }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12.5px; color:#e5484d">비밀번호가 올바르지 않습니다.</div>
+    </sc-if>
+    <button type="submit" style="background:#1f6feb; color:#fff; border:none; border-radius:7px; padding:10px 0; font-size:14px; font-weight:700; cursor:pointer">확인</button>
+  </form>
+</div>
+</sc-if>
+<sc-if value="{{ isUnlocked }}" hint-placeholder-val="{{ true }}">
+<div style="min-width:1820px; background:#eef1f5; color:#1a2330; padding-bottom:40px">
+
+  <div style="background:#154ab0; color:#fff; padding:0 28px; display:flex; align-items:stretch; justify-content:space-between; box-shadow:0 1px 0 rgba(0,0,0,.12)">
+    <div style="display:flex; align-items:center; gap:18px; padding:14px 0; width:304px; flex:none">
+      <div style="display:flex; flex-direction:column; gap:2px">
+        <div style="font-size:18px; font-weight:800; letter-spacing:-.6px; white-space:nowrap; padding-left:10px">{{ misc.title }}</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:flex-end; gap:2px; margin-right:auto">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+        <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; padding:14px 0; font-size:12px; color:rgba(255,255,255,.8)">
+      <sc-if value="{{ showSaveBar }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap:8px">
+        <span style="{{ saveStatusStyle }}">{{ saveStatusText }}</span>
+        <button onClick="{{ onManualSave }}" style="{{ saveBtnStyle }}">{{ saveBtnLabel }}</button>
+        <sc-if value="{{ saveModalOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:99999; display:flex; align-items:center; justify-content:center">
+          <div style="background:#fff; border-radius:14px; padding:28px 36px; min-width:260px; display:flex; flex-direction:column; align-items:center; gap:14px; box-shadow:0 12px 40px rgba(0,0,0,.25)">
+            <sc-if value="{{ saveIsSaving }}" hint-placeholder-val="{{ false }}">
+              <div style="width:38px; height:38px; border:4px solid #dfe4ec; border-top-color:#1f6feb; border-radius:50%; animation:saveSpin .8s linear infinite"></div>
+            </sc-if>
+            <sc-if value="{{ saveIsSaved }}" hint-placeholder-val="{{ false }}">
+              <div style="width:38px; height:38px; border-radius:50%; background:#1f9d55; color:#fff; font-size:22px; font-weight:800; display:flex; align-items:center; justify-content:center">✓</div>
+            </sc-if>
+            <sc-if value="{{ saveIsError }}" hint-placeholder-val="{{ false }}">
+              <div style="width:38px; height:38px; border-radius:50%; background:#d93025; color:#fff; font-size:22px; font-weight:800; display:flex; align-items:center; justify-content:center">!</div>
+            </sc-if>
+            <span style="font-size:16px; font-weight:800; color:#1a2330; letter-spacing:-.4px">{{ saveModalTitle }}</span>
+            <span style="font-size:12px; color:#7b8698">{{ saveModalSub }}</span>
+            <sc-if value="{{ saveIsError }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ closeSaveModal }}" style="border:0; background:#1f6feb; color:#fff; font-size:13px; font-weight:800; padding:8px 20px; border-radius:6px; cursor:pointer">닫기</button>
+            </sc-if>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:2px">
+        <span style="font-weight:700; color:#fff; font-size:12.5px">제작자: {{ misc.creator }}</span>
+        <span>{{ misc.version }}</span>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex; align-items:flex-start; gap:16px; padding:16px 20px">
+
+    <div style="width:296px; flex:none; display:flex; flex-direction:column; gap:12px; position:sticky; top:16px">
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+        <div style="padding:11px 14px; background:#000; color:#fff; border-bottom:1px solid #000; font-size:12.5px; font-weight:800; letter-spacing:-.3px; display:flex; justify-content:space-between; align-items:center">
+          <span>조회 조건</span>
+          <button onClick="{{ onReset }}" style="border:1px solid #d3dae4; background:#fff; color:#5b6779; font-size:11px; font-weight:700; padding:3px 9px; border-radius:5px; cursor:pointer">초기화</button>
+        </div>
+        <div style="padding:14px; display:flex; flex-direction:column; gap:14px">
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">통신사</div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:4px">
+              <sc-for list="{{ carrierOpts }}" as="o" hint-placeholder-count="4">
+                <button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">휴대폰 기종</div>
+            <select value="{{ device }}" onChange="{{ onDevice }}" style="width:100%; padding:8px 9px; border:1px solid #d3dae4; border-radius:6px; font-size:12.5px; background:#fff; color:#1a2330">
+              <sc-for list="{{ deviceOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o }}">{{ o }}</option></sc-for>
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">요금제</div>
+            <select value="{{ plan }}" onChange="{{ onPlan }}" style="width:100%; padding:8px 9px; border:1px solid #d3dae4; border-radius:6px; font-size:12.5px; background:#fff; color:#1a2330">
+              <sc-for list="{{ planOpts }}" as="o" hint-placeholder-count="5"><option value="{{ o }}">{{ o }}</option></sc-for>
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">가입유형</div>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px">
+              <sc-for list="{{ joinOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">할인유형</div>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px">
+              <sc-for list="{{ discOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.onClick }}" style="{{ o.style }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <div style="font-size:12px; font-weight:800; color:#1a2330; letter-spacing:.2px; padding-left:3px">거래처</div>
+            <select value="{{ vendor }}" onChange="{{ onVendor }}" style="width:100%; padding:8px 9px; border:1px solid #d3dae4; border-radius:6px; font-size:12.5px; background:#fff; color:#1a2330">
+              <sc-for list="{{ vendorOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o }}">{{ o }}</option></sc-for>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+        <div style="padding:8px 14px; background:#1e9e5a; border-bottom:1px solid #178049; display:flex; align-items:center; justify-content:space-between; gap:8px; color:#fff">
+          <span style="font-size:12.5px; font-weight:800; letter-spacing:-.3px">부가서비스 유치 여부</span>
+          <span style="display:flex; gap:4px">
+            <button onClick="{{ vasAllOn }}" style="border:1px solid rgba(255,255,255,.7); background:#fff; color:#178049; border-radius:5px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit">전체선택</button>
+            <button onClick="{{ vasAllOff }}" style="border:1px solid rgba(255,255,255,.7); background:transparent; color:#fff; border-radius:5px; padding:3px 8px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit">전체해제</button>
+          </span>
+        </div>
+        <div style="padding:4px 8px 12px; display:flex; flex-direction:column">
+          <sc-for list="{{ vasToggles }}" as="v" hint-placeholder-count="5">
+            <label onClick="{{ v.onClick }}" style="{{ v.style }}">
+              <span style="display:flex; align-items:center; gap:9px">
+                <span style="{{ v.box }}">{{ v.mark }}</span>
+                <span style="font-size:12.5px; font-weight:600">{{ v.name }}</span>
+              </span>
+              <span style="{{ v.amtStyle }}">{{ v.amtLabel }}</span>
+            </label>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:14px">
+
+      <div onClick="{{ onOpenNotice }}" style="display:flex; align-items:center; gap:10px; background:#000; border:1px solid #000; border-radius:10px; padding:12px 16px; overflow:hidden; cursor:pointer">
+        <span style="font-size:12.5px; font-weight:800; letter-spacing:-.3px; color:#ffd400; white-space:nowrap">📢 공지사항</span>
+        <div style="flex:1; min-width:0; height:16px; overflow:hidden; position:relative">
+          <span key="{{ noticeIdx }}" style="display:block; font-size:12.5px; color:#ffd400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:noticeSlideUp .45s ease">{{ noticeText }}</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px">
+        <sc-for list="{{ top3 }}" as="r" hint-placeholder-count="3">
+          <div onClick="{{ r.onClick }}" style="{{ r.cardStyle }}">
+            <div style="display:flex; align-items:center; justify-content:space-between">
+              <span style="{{ r.badgeStyle }}">{{ r.rankLabel }}</span>
+              <span style="{{ r.carrierStyle }}">{{ r.carrier }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:3px; margin-top:8px">
+              <div style="font-size:18px; font-weight:800; letter-spacing:-.5px">{{ r.device }}</div>
+              <div style="font-size:13px; color:#6b7788">{{ r.vendor }} · {{ r.plan }} · {{ r.joinType }} / {{ r.discountType }}</div>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:6px; margin-top:8px">
+              <span style="font-size:29px; font-weight:900; letter-spacing:-2px; color:#0b3fa8; font-variant-numeric:tabular-nums; line-height:1">{{ r.final }}</span>
+              <span style="font-size:15px; font-weight:800; color:#0b3fa8; padding-bottom:5px">만원</span>
+            </div>
+            <div style="display:flex; gap:0; margin-top:9px; border-top:1px dashed #e2e7ef; padding-top:8px">
+              <div style="flex:1; display:flex; flex-direction:column; gap:1px"><span style="font-size:12px; color:#8b95a6; font-weight:700">리베이트</span><span style="font-size:15px; font-weight:800; font-variant-numeric:tabular-nums">{{ r.rebate }}</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:1px"><span style="font-size:12px; color:#8b95a6; font-weight:700">추가지원</span><span style="font-size:15px; font-weight:800; color:#047857; font-variant-numeric:tabular-nums">+{{ r.addSupport }}</span></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:1px"><span style="font-size:12px; color:#8b95a6; font-weight:700">미유치 차감</span><span style="{{ r.dedStyle }}">{{ r.dedLabel }}</span></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+        <table style="width:100%; border-collapse:collapse; font-size:12.5px; table-layout:fixed">
+          <thead>
+            <tr style="background:#1f6feb; color:#fff">
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:50px">순위</th>
+              <th style="box-sizing:border-box; padding:12px 10px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:64px">통신사</th>
+              <th style="box-sizing:border-box; padding:12px 10px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:115px; white-space:nowrap">기종명</th>
+              <th style="box-sizing:border-box; padding:12px 10px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:75px">거래처</th>
+              <th style="box-sizing:border-box; padding:12px 10px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:95px">요금제</th>
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:76px">가입유형</th>
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:88px">할인유형</th>
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:70px">리베이트</th>
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:65px">차감액</th>
+              <th style="box-sizing:border-box; padding:12px 8px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1f6feb; width:76px">프로모션</th>
+              <th style="box-sizing:border-box; padding:12px 10px; text-align:center; font-weight:800; font-size:14px; border-bottom:1px solid #1858c0; width:86px; background:#1858c0; color:#fff">최종액</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="10">
+              <tr onClick="{{ r.onClick }}" style="{{ r.rowStyle }}">
+                <td style="{{ r.tdRank }}">{{ r.rank }}</td>
+                <td style="padding:9px 10px; border-bottom:1px solid #eef1f6; text-align:center"><span style="{{ r.chipStyle }}">{{ r.carrier }}</span></td>
+                <td style="padding:9px 10px; border-bottom:1px solid #eef1f6; font-weight:700; letter-spacing:-.2px; white-space:nowrap; text-align:center">{{ r.device }}</td>
+                <td style="padding:9px 10px; border-bottom:1px solid #eef1f6; color:#1a2230; font-size:13.5px; font-weight:600; text-align:center">{{ r.vendor }}</td>
+                <td style="padding:9px 10px; border-bottom:1px solid #eef1f6; color:#1a2230; font-size:13.5px; font-weight:600; text-align:center">{{ r.plan }}</td>
+                <td style="padding:9px 8px; border-bottom:1px solid #eef1f6; text-align:center; color:#1a2230; font-size:13.5px; font-weight:600">{{ r.joinType }}</td>
+                <td style="padding:9px 8px; border-bottom:1px solid #eef1f6; text-align:center; color:#1a2230; font-size:13px; font-weight:600">{{ r.discLabel }}</td>
+                <td style="padding:9px 8px; border-bottom:1px solid #eef1f6; text-align:center; font-weight:700; font-size:14.5px; font-variant-numeric:tabular-nums">{{ r.rebate }}</td>
+                <td style="{{ r.tdDed }}">{{ r.dedLabel }}</td>
+                <td style="padding:9px 8px; border-bottom:1px solid #eef1f6; text-align:center; font-weight:700; font-size:14.5px; color:#047857; font-variant-numeric:tabular-nums">{{ r.supLabel }}</td>
+                <td style="{{ r.tdFinal }}">{{ r.final }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; justify-content:center; padding:16px 0">
+            <button onClick="{{ onShowMore }}" style="border:1px solid #d3dae4; background:#f6f8fb; color:#4b5768; padding:9px 20px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer">{{ moreLabel }}</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:56px 0; text-align:center; color:#8b95a6; font-size:13px">조건에 맞는 정책이 없습니다. 좌측 조회 조건을 넓혀 주세요.</div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="width:453px; flex:none; display:flex; flex-direction:column; gap:12px; position:sticky; top:16px">
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+        <div style="padding:12px 14px; background:#d62828; border-bottom:1px solid #b81f1f; display:flex; align-items:baseline; gap:8px; justify-content:space-between">
+          <span style="display:flex; align-items:baseline; gap:8px">
+            <span style="font-size:16px; font-weight:800; letter-spacing:-.3px; color:#fff">금일 개봉재고 현황</span>
+            <span style="font-size:11px; font-weight:700; color:#fff">{{ stockUpdatedLabel }}</span>
+          </span>
+          <span style="font-size:12px; font-weight:800; color:#fff">총 {{ openStockTotal }}개</span>
+        </div>
+        <div style="overflow:auto; max-height:640px">
+          <table style="width:100%; border-collapse:collapse; font-size:12px">
+            <thead>
+              <tr style="background:#d62828; color:#fff">
+                <th onClick="{{ onSortStockCarrier }}" style="position:sticky; top:0; z-index:2; background:#d62828; box-sizing:border-box; padding:8px 10px; text-align:left; font-weight:800; font-size:10.5px; border-bottom:1px solid #b81f1f; cursor:pointer; user-select:none">통신사{{ stockSortCarrierArrow }}</th>
+                <th onClick="{{ onSortStockModel }}" style="position:sticky; top:0; z-index:2; background:#d62828; box-sizing:border-box; padding:8px 10px; text-align:left; font-weight:800; font-size:10.5px; border-bottom:1px solid #b81f1f; cursor:pointer; user-select:none">모델명{{ stockSortModelArrow }}</th>
+                <th style="position:sticky; top:0; z-index:2; background:#d62828; box-sizing:border-box; padding:8px 10px; text-align:left; font-weight:800; font-size:10.5px; border-bottom:1px solid #b81f1f">색상</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ openStockRows }}" as="r" hint-placeholder-count="4">
+                <tr onClick="{{ r.onClick }}" style="cursor:pointer">
+                  <td style="padding:7px 10px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.carrier }}</td>
+                  <td style="padding:7px 10px; border-bottom:1px solid #eef1f6; font-weight:700">{{ r.model }}</td>
+                  <td style="padding:7px 10px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.color }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <sc-if value="{{ openStockEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:40px 0; text-align:center; color:#8b95a6; font-size:12px">개봉재고 데이터가 없습니다.</div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+        <div style="padding:12px 14px; background:#f6f8fb; border-bottom:1px solid #e2e7ef; display:flex; align-items:baseline; gap:8px; justify-content:space-between">
+          <span style="font-size:14px; font-weight:800; letter-spacing:-.3px; color:#1a2330">거래처 현황</span>
+          <span style="font-size:12px; font-weight:800; color:#4b5768">전체 {{ vendorStatusRows.length }}곳</span>
+        </div>
+        <div style="overflow:auto; max-height:93px">
+          <table style="width:100%; border-collapse:collapse; font-size:12.5px">
+            <tbody>
+              <sc-for list="{{ vendorStatusRows }}" as="v" hint-placeholder-count="5">
+                <tr>
+                  <td style="padding:8px 10px; border-bottom:1px solid #eef1f6; color:#8b95a6; font-size:11px; width:50px">{{ v.carrier }}</td>
+                  <td style="padding:8px 10px; border-bottom:1px solid #eef1f6; font-weight:700">{{ v.name }}</td>
+                  <td style="padding:8px 10px; border-bottom:1px solid #eef1f6; text-align:right"><span style="{{ v.statusStyle }}">{{ v.statusLabel }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:12px 14px; border-top:1px solid #e2e7ef; background:#fafbfd; display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+          <sc-for list="{{ vendorCarrierCounts }}" as="c" hint-placeholder-count="3">
+            <span style="display:flex; align-items:center; gap:5px; background:#eafaf0; border:1px solid #bfe9d3; border-radius:8px; padding:5px 10px">
+              <span style="font-size:11px; font-weight:800; color:#1b8a55">{{ c.carrier }}</span>
+              <span style="font-size:13px; font-weight:800; color:#1b8a55">{{ c.on }}</span>
+            </span>
+          </sc-for>
+          <span style="display:flex; align-items:center; gap:5px; background:#fdf1f1; border:1px solid #f0c9c9; border-radius:8px; padding:5px 10px">
+            <span style="font-size:11px; font-weight:800; color:#c0392b">미운영중 거래처</span>
+            <span style="font-size:13px; font-weight:800; color:#c0392b">{{ vendorOffVendorCount }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isPolicyLocked }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lock.wrapStyle }}">
+      <div style="{{ lock.boxStyle }}">
+        <div style="font-size:14px; font-weight:800; letter-spacing:-.3px">정책표 입력 잠금</div>
+        <div style="font-size:12px; color:#7b8698">비밀번호를 입력하면 새로고침 전까지 유지됩니다.</div>
+        <input type="password" value="{{ lock.value }}" onChange="{{ lock.onChange }}" onKeyDown="{{ lock.onKeyDown }}" style="{{ lock.inputStyle }}" placeholder="비밀번호">
+        <sc-if value="{{ lock.error }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#c2410c; font-weight:700">비밀번호가 올바르지 않습니다.</div></sc-if>
+        <button onClick="{{ lock.onSubmit }}" style="{{ lock.btnStyle }}">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPolicy }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px">
+
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px">
+      <sc-for list="{{ applyCards }}" as="card" hint-placeholder-count="2">
+        <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; display:flex; flex-direction:column">
+          <div style="height:4px; background:{{ card.barColor }}; border-radius:9px 9px 0 0"></div>
+          <div style="padding:14px 16px; display:flex; flex-direction:column; gap:8px">
+            <span style="font-size:13.5px; font-weight:800; letter-spacing:-.3px">{{ card.title }}</span>
+            <sc-for list="{{ card.fields }}" as="fl" hint-placeholder-count="4">
+              <div style="position:relative">
+                <div onClick="{{ fl.onToggle }}" style="{{ fl.boxStyle }}">
+                  <span style="{{ fl.labelStyle }}">{{ fl.label }}</span>
+                  <span style="font-size:10px; color:#aab3c0">▾</span>
+                </div>
+                <sc-if value="{{ fl.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="{{ fl.panelStyle }}">
+                    <sc-if value="{{ fl.hasOptions }}" hint-placeholder-val="{{ false }}">
+                      <div style="{{ fl.bulkRowStyle }}">
+                        <button onClick="{{ fl.onSelectAll }}" style="{{ fl.bulkBtnStyle }}">전체선택</button>
+                        <button onClick="{{ fl.onDeselectAll }}" style="{{ fl.bulkBtnStyle }}">전체해제</button>
+                      </div>
+                    </sc-if>
+                    <sc-for list="{{ fl.options }}" as="op" hint-placeholder-count="3">
+                      <div onClick="{{ op.onClick }}" style="{{ op.rowStyle }}">
+                        <span style="{{ op.boxStyle }}">{{ op.mark }}</span><span>{{ op.label }}</span>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ fl.empty }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding:8px; font-size:11px; color:#c3ccd8">항목 없음</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div style="display:flex; gap:6px; align-items:center; margin-top:2px">
+              <input value="{{ card.amount }}" onChange="{{ card.onAmount }}" placeholder="00" style="{{ card.amountStyle }}">
+              <button onClick="{{ card.onApply }}" style="{{ card.applyBtnStyle }}">{{ card.applyLabel }}</button>
+              <button onClick="{{ card.onReset }}" style="{{ card.resetBtnStyle }}">초기화</button>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden; display:flex; flex-direction:column">
+          <div style="height:4px; background:{{ card.barColor }}"></div>
+          <div style="padding:14px 16px; display:flex; flex-direction:column; gap:8px; flex:1">
+            <span style="font-size:13.5px; font-weight:800; letter-spacing:-.3px">{{ card.memoTitle }}</span>
+            <div style="{{ card.memoBoxStyle }}">
+              <sc-for list="{{ card.log }}" as="ln" hint-placeholder-count="2">
+                <div style="font-size:11.5px; color:#4b5768; padding:4px 0; border-bottom:1px dashed #eef1f6; line-height:1.5">{{ ln }}</div>
+              </sc-for>
+              <sc-if value="{{ card.logEmpty }}" hint-placeholder-val="{{ true }}">
+                <span style="font-size:11px; color:#c3ccd8">적용 내역 없음</span>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+      <div style="padding:13px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <div style="display:flex; flex-direction:column; gap:3px">
+          <span style="font-size:14px; font-weight:800; letter-spacing:-.4px">정책표 입력 · 관리</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex:none">
+          <span style="font-size:11.5px; color:#8b95a6; white-space:nowrap; font-weight:700">{{ sheetSummary }}</span>
+          <input type="file" ref="{{ importInputRef }}" accept=".xlsx" onChange="{{ onImportFile }}" style="display:none">
+          <button onClick="{{ onTruncateRebate }}" title="현재 거래처 정책표의 원정책 값 뒷자리 1자리를 잘라냅니다. 예: 350 → 35" style="background:#fff; border:1px solid #dfe4ec; color:#4b5768; padding:8px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap">원정책 뒷자리 절삭</button>
+          <button onClick="{{ onTriggerImport }}" title="원가(검정 글씨) 값만 자동 인식해 현재 거래처 정책표에 적용합니다. 색이 있는 글씨는 무시됩니다." style="background:#1f6feb; border:none; color:#fff; padding:8px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap">엑셀 첨부하기</button>
+        </div>
+      </div>
+      <sc-if value="{{ importStatus }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ importStatusStyle }}">{{ importStatusMsg }}</div>
+      </sc-if>
+      <div style="display:flex; align-items:flex-end; gap:3px; padding:8px 16px 0; background:#f0f3f8; border-top:1px solid #e6ebf2; overflow-x:auto; overflow-y:hidden; scrollbar-width:thin">
+        <sc-for list="{{ sheetTabs }}" as="s" hint-placeholder-count="3">
+          <button onClick="{{ s.onClick }}" style="{{ s.style }}">
+            <span onClick="{{ s.onToggleVisible }}" title="{{ s.toggleTitle }}" style="{{ s.toggleTrackStyle }}"><span style="{{ s.toggleThumbStyle }}"></span></span>
+            <span>{{ s.label }}</span><span style="{{ s.countStyle }}">{{ s.count }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="padding:14px 16px 16px; background:#f6f8fb; display:flex; flex-direction:column; gap:12px">
+        <sc-for list="{{ carrierSections }}" as="sec" hint-placeholder-count="3">
+        <div style="display:flex; flex-direction:column; gap:8px">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span style="{{ sec.chipStyle }}">{{ sec.carrier }}</span>
+            <span style="font-size:11.5px; font-weight:700; color:#8b95a6; white-space:nowrap">기종 {{ sec.count }}개</span>
+            <div style="flex:1; height:1px; background:#e2e7ef"></div>
+            <sc-if value="{{ sec.isOwn }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ sec.onAdd }}" style="background:#fff; border:1px solid #c9dcfb; color:#1f6feb; padding:5px 12px; border-radius:5px; font-size:11.5px; font-weight:700; cursor:pointer; white-space:nowrap">{{ sec.addLabel }}</button>
+            </sc-if>
+          </div>
+          <div style="background:#fff; border:1px solid #cfd6e0; border-radius:9px; overflow:auto">
+            <table style="border-collapse:collapse; font-size:12.5px; width:100%; table-layout:auto">
+              <thead>
+                <tr>
+                  <th style="{{ sec.mx.labelStyle }}">요금제</th>
+                  <th rowSpan="3" style="box-sizing:border-box; padding:8px 6px; text-align:center; font-weight:800; font-size:11px; color:#6b7788; background:#f4f6f9; border-bottom:1px solid #e2e7ef; white-space:nowrap; width:52px">기종삭제</th>
+                  <sc-for list="{{ sec.mx.planHeads }}" as="h" hint-placeholder-count="4">
+                    <th colSpan="4" style="{{ h.cellStyle }}">
+                      <span style="{{ h.wrapStyle }}">
+                        <span onClick="{{ h.onRank }}" title="체크 시 리베이트 조회순위에 노출" style="{{ h.rankBox }}">{{ h.rankMark }}</span>
+                        <span onClick="{{ h.onClick }}">{{ h.label }}</span>
+                      </span>
+                    </th>
+                  </sc-for>
+                </tr>
+                <tr>
+                  <th style="{{ sec.mx.labelStyle }}">가입유형</th>
+                  <sc-for list="{{ sec.mx.joinHeads }}" as="h" hint-placeholder-count="8">
+                    <th colSpan="2" style="{{ h.cellStyle }}">
+                      <span onClick="{{ h.onClick }}" style="{{ h.wrapStyle }}">
+                        <span>{{ h.label }}</span>
+                      </span>
+                    </th>
+                  </sc-for>
+                </tr>
+                <tr>
+                  <th style="{{ sec.mx.labelStyle }}">할인유형</th>
+                  <sc-for list="{{ sec.mx.discHeads }}" as="h" hint-placeholder-count="16">
+                    <th style="{{ h.cellStyle }}">
+                      <span onClick="{{ h.onClick }}" style="{{ h.wrapStyle }}">
+                        <span>{{ h.label }}</span>
+                      </span>
+                    </th>
+                  </sc-for>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ sec.mx.devices }}" as="g" hint-placeholder-count="3">
+                  <tr>
+                    <td style="{{ g.nameCellStyle }}">
+                      <div style="display:flex; flex-direction:column; gap:4px">
+                        <select value="{{ g.device }}" onChange="{{ g.onDevice }}" style="width:100%; box-sizing:border-box; border:1px solid #e2e7ef; border-radius:5px; padding:5px 7px; font-size:12.5px; font-weight:800; letter-spacing:-.3px; color:#1a2330; background:#fff">
+                          <sc-for list="{{ g.deviceOpts }}" as="d" hint-placeholder-count="4"><option value="{{ d }}">{{ d }}</option></sc-for>
+                        </select>
+                      </div>
+                    </td>
+                    <td style="{{ g.deleteCellStyle }}">
+                      <button onClick="{{ g.onDelete }}" title="기종 삭제" style="border:1px solid #e6d0d0; background:#fff; color:#b04141; width:24px; height:24px; border-radius:6px; font-size:14px; line-height:1; cursor:pointer">×</button>
+                    </td>
+                    <sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="16">
+                      <td style="{{ c.style }}">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:2px">
+                          <input value="{{ c.value }}" onChange="{{ c.onChange }}" style="width:26px; box-sizing:border-box; border:none; background:transparent; padding:6px 0; font-size:14px; text-align:right; font-weight:800; color:#1a2330; font-variant-numeric:tabular-nums; flex:none">
+                          <span style="{{ c.addLabelStyle }}">{{ c.addLabel }}</span>
+                          <span style="{{ c.dedLabel2Style }}">{{ c.dedLabel2 }}</span>
+                        </div>
+                      </td>
+                    </sc-for>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isVendorLocked }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lock.wrapStyle }}">
+      <div style="{{ lock.boxStyle }}">
+        <div style="font-size:14px; font-weight:800; letter-spacing:-.3px">거래처 관리 잠금</div>
+        <div style="font-size:12px; color:#7b8698">비밀번호를 입력하면 새로고침 전까지 유지됩니다.</div>
+        <input type="password" value="{{ lock.value }}" onChange="{{ lock.onChange }}" onKeyDown="{{ lock.onKeyDown }}" style="{{ lock.inputStyle }}" placeholder="비밀번호">
+        <sc-if value="{{ lock.error }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#c2410c; font-weight:700">비밀번호가 올바르지 않습니다.</div></sc-if>
+        <button onClick="{{ lock.onSubmit }}" style="{{ lock.btnStyle }}">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isVendor }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:16px 20px; display:grid; grid-template-columns:repeat(3,1fr); gap:14px; align-items:start">
+    <sc-for list="{{ vendorRows }}" as="v" hint-placeholder-count="5">
+      <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+          <input value="{{ v.name }}" onChange="{{ v.onName }}" style="flex:1; border:1px solid transparent; border-radius:6px; padding:5px 7px; font-size:15px; font-weight:800; letter-spacing:-.4px; color:#1a2330; background:#f6f8fb">
+          <span style="font-size:11.5px; font-weight:700; color:#1f6feb; background:#eaf1fe; padding:4px 9px; border-radius:12px; white-space:nowrap">기종 {{ v.count }}개</span>
+          <button onClick="{{ v.onDelete }}" title="거래처 삭제" style="{{ v.deleteBtnStyle }}">{{ v.deleteBtnLabel }}</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px">
+          <span style="font-size:11px; color:#8b95a6; font-weight:700">운영 통신사 (1개 선택)</span>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:5px">
+            <sc-for list="{{ v.carrierOpts }}" as="c" hint-placeholder-count="3">
+              <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:11px; color:#8b95a6; font-weight:700">비고</span>
+          <textarea value="{{ v.note }}" onChange="{{ v.onNote }}" rows="2" style="border:1px solid #e2e7ef; border-radius:5px; padding:6px 8px; font-size:11.5px; color:#4b5768; resize:vertical; line-height:1.5"></textarea>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; border-top:1px dashed #e2e7ef; padding-top:10px">
+          <div style="display:flex; align-items:center; justify-content:space-between">
+            <span style="font-size:11px; color:#8b95a6; font-weight:700">부가서비스</span>
+            <button onClick="{{ v.onAddVas }}" style="border:1px solid #c9dcfb; background:#fff; color:#1f6feb; padding:3px 9px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer">+ 추가</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; padding:0 7px">
+            <span style="flex:1; min-width:0; font-size:10px; color:#aab3c0">항목 / 유지조건</span>
+            <span style="width:56px; box-sizing:border-box; text-align:right; font-size:10px; color:#aab3c0">유치시 추가</span>
+            <span style="width:48px; box-sizing:border-box; text-align:right; font-size:10px; color:#aab3c0">미유치 차감</span>
+            <span style="width:20px; flex:none"></span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:5px">
+            <sc-for list="{{ v.vasList }}" as="s" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:6px; padding:5px 7px; background:#fff8f1; border-radius:6px">
+                <select value="{{ s.selectedId }}" onChange="{{ s.onSelect }}" style="flex:1; min-width:0; border:1px solid #f0d9c2; border-radius:5px; padding:4px 6px; font-size:11.5px; font-weight:700; color:#1a2330; background:#fff">
+                  <sc-for list="{{ s.catalogOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                </select>
+                <input value="{{ s.term }}" onChange="{{ s.onTerm }}" style="width:76px; box-sizing:border-box; border:1px solid #f0d9c2; border-radius:5px; padding:4px 6px; font-size:10.5px; color:#4b5768; background:#fff">
+                <input value="{{ s.add }}" onChange="{{ s.onAdd }}" title="유치시 추가 금액" style="width:56px; box-sizing:border-box; border:1px solid #cfe3d4; border-radius:5px; padding:4px 6px; font-size:11.5px; text-align:right; font-weight:800; color:#0f7b4a; font-variant-numeric:tabular-nums; background:#fff">
+                <input value="{{ s.deduct }}" onChange="{{ s.onDeduct }}" title="미유치시 차감 금액" style="width:48px; box-sizing:border-box; border:1px solid #f0d9c2; border-radius:5px; padding:4px 6px; font-size:11.5px; text-align:right; font-weight:800; color:#c2410c; font-variant-numeric:tabular-nums; background:#fff">
+                <span style="font-size:10.5px; color:#8b95a6; white-space:nowrap">만원</span>
+                <button onClick="{{ s.onDelete }}" style="border:1px solid #e6d0d0; background:#fff; color:#b04141; width:20px; height:20px; flex:none; border-radius:5px; font-size:12px; line-height:1; cursor:pointer">×</button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ v.noVas }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11px; color:#c3ccd8">등록된 항목 없음</span>
+            </sc-if>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed #e2e7ef; padding-top:10px">
+          <span style="font-size:11.5px; color:#8b95a6">평균 리베이트</span>
+          <span style="font-size:14px; font-weight:800; color:#1a2330; font-variant-numeric:tabular-nums">{{ v.avg }}만원</span>
+        </div>
+      </div>
+    </sc-for>
+    <div style="background:#fff; border:1px dashed #c9d3e0; border-radius:10px; padding:16px; display:flex; align-items:center; justify-content:center; min-height:150px">
+      <button onClick="{{ onAddVendor }}" style="background:#f6f8fb; border:1px solid #d3dae4; color:#4b5768; padding:10px 20px; border-radius:7px; font-size:12.5px; font-weight:700; cursor:pointer">거래처 추가</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isVasCatalogLocked }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lock.wrapStyle }}">
+      <div style="{{ lock.boxStyle }}">
+        <div style="font-size:14px; font-weight:800; letter-spacing:-.3px">부가서비스 항목 관리 잠금</div>
+        <div style="font-size:12px; color:#7b8698">비밀번호를 입력하면 새로고침 전까지 유지됩니다.</div>
+        <input type="password" value="{{ lock.value }}" onChange="{{ lock.onChange }}" onKeyDown="{{ lock.onKeyDown }}" style="{{ lock.inputStyle }}" placeholder="비밀번호">
+        <sc-if value="{{ lock.error }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#c2410c; font-weight:700">비밀번호가 올바르지 않습니다.</div></sc-if>
+        <button onClick="{{ lock.onSubmit }}" style="{{ lock.btnStyle }}">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isVasCatalog }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px">
+    <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:14px; font-weight:800; letter-spacing:-.4px">부가서비스 항목 관리</span>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px">
+      <sc-for list="{{ vasCatalogRows }}" as="row" hint-placeholder-count="3">
+        <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; align-items:center; justify-content:space-between">
+            <span style="{{ row.chipStyle }}">{{ row.carrier }}</span>
+            <button onClick="{{ row.onAdd }}" style="border:1px solid #c9dcfb; background:#fff; color:#1f6feb; padding:4px 10px; border-radius:5px; font-size:11.5px; font-weight:700; cursor:pointer">+ 항목 추가</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; gap:6px">
+                <input value="{{ it.name }}" onChange="{{ it.onName }}" style="flex:1; min-width:0; border:1px solid #e2e7ef; border-radius:5px; padding:6px 8px; font-size:12.5px; font-weight:700; color:#1a2330">
+                <button onClick="{{ it.onDelete }}" style="border:1px solid #e6d0d0; background:#fff; color:#b04141; width:24px; height:24px; flex:none; border-radius:6px; font-size:14px; line-height:1; cursor:pointer">×</button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ row.noItems }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11px; color:#c3ccd8">등록된 항목 없음</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDeviceCatalogLocked }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lock.wrapStyle }}">
+      <div style="{{ lock.boxStyle }}">
+        <div style="font-size:14px; font-weight:800; letter-spacing:-.3px">기종 관리 잠금</div>
+        <div style="font-size:12px; color:#7b8698">비밀번호를 입력하면 새로고침 전까지 유지됩니다.</div>
+        <input type="password" value="{{ lock.value }}" onChange="{{ lock.onChange }}" onKeyDown="{{ lock.onKeyDown }}" style="{{ lock.inputStyle }}" placeholder="비밀번호">
+        <sc-if value="{{ lock.error }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#c2410c; font-weight:700">비밀번호가 올바르지 않습니다.</div></sc-if>
+        <button onClick="{{ lock.onSubmit }}" style="{{ lock.btnStyle }}">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isDeviceCatalog }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px">
+    <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:14px; font-weight:800; letter-spacing:-.4px">기종 관리</span>
+    </div>
+    <div style="max-width:420px">
+      <sc-for list="{{ deviceCatalogRows }}" as="row" hint-placeholder-count="1">
+        <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:16px; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; align-items:center; justify-content:space-between">
+            <span style="font-size:12.5px; font-weight:800; color:#5b6779">등록된 기종</span>
+            <button onClick="{{ row.onAdd }}" style="border:1px solid #c9dcfb; background:#fff; color:#1f6feb; padding:4px 10px; border-radius:5px; font-size:11.5px; font-weight:700; cursor:pointer">+ 기종 추가</button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <sc-for list="{{ row.items }}" as="it" hint-placeholder-count="6">
+              <div style="display:flex; align-items:center; gap:6px">
+                <input value="{{ it.name }}" onChange="{{ it.onName }}" style="flex:1; min-width:0; border:1px solid #e2e7ef; border-radius:5px; padding:6px 8px; font-size:12.5px; font-weight:700; color:#1a2330">
+                <button onClick="{{ it.onDelete }}" style="border:1px solid #e6d0d0; background:#fff; color:#b04141; width:24px; height:24px; flex:none; border-radius:6px; font-size:14px; line-height:1; cursor:pointer">×</button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ row.noItems }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11px; color:#c3ccd8">등록된 기종 없음</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isMiscLocked }}" hint-placeholder-val="{{ false }}">
+    <div style="{{ lock.wrapStyle }}">
+      <div style="{{ lock.boxStyle }}">
+        <div style="font-size:14px; font-weight:800; letter-spacing:-.3px">기타관리 잠금</div>
+        <div style="font-size:12px; color:#7b8698">비밀번호를 입력하면 새로고침 전까지 유지됩니다.</div>
+        <input type="password" value="{{ lock.value }}" onChange="{{ lock.onChange }}" onKeyDown="{{ lock.onKeyDown }}" style="{{ lock.inputStyle }}" placeholder="비밀번호">
+        <sc-if value="{{ lock.error }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#c2410c; font-weight:700">비밀번호가 올바르지 않습니다.</div></sc-if>
+        <button onClick="{{ lock.onSubmit }}" style="{{ lock.btnStyle }}">확인</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isMisc }}" hint-placeholder-val="{{ false }}">
+  <div style="padding:16px 20px; display:flex; flex-direction:column; gap:14px">
+    <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:14px; font-weight:800; letter-spacing:-.4px">기타관리</span>
+    </div>
+    <div style="max-width:520px; background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:16px">
+      <div style="display:flex; flex-direction:column; gap:5px">
+        <span style="font-size:12px; font-weight:800; color:#5b6779">프로그램 제목</span>
+        <input value="{{ misc.title }}" onChange="{{ misc.onTitle }}" style="border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13.5px; font-weight:700; color:#1a2330">
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <span style="font-size:12px; font-weight:800; color:#5b6779">공지사항</span>
+        <sc-for list="{{ noticeItems }}" as="n" hint-placeholder-count="2">
+          <div style="display:flex; gap:8px; align-items:center">
+            <input value="{{ n.value }}" onChange="{{ n.onChange }}" style="flex:1; border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13px; color:#1a2330">
+            <button onClick="{{ n.onDelete }}" style="border:1px solid #f0c9c9; background:#fff5f5; color:#c0392b; font-size:11px; font-weight:700; padding:7px 10px; border-radius:6px; cursor:pointer; white-space:nowrap">삭제</button>
+          </div>
+        </sc-for>
+        <button onClick="{{ onAddNotice }}" style="align-self:flex-start; border:1px dashed #c7d0dd; background:#fff; color:#5b6779; font-size:11.5px; font-weight:700; padding:6px 12px; border-radius:6px; cursor:pointer">+ 공지 추가</button>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; font-weight:800; color:#5b6779">제작자</span>
+          <input value="{{ misc.creator }}" onChange="{{ misc.onCreator }}" style="border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13px; color:#1a2330">
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; font-weight:800; color:#5b6779">버전 표시</span>
+          <input value="{{ misc.version }}" onChange="{{ misc.onVersion }}" style="border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13px; color:#1a2330">
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width:520px; background:#fff; border:1px solid #dfe4ec; border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:14px">
+      <div style="display:flex; flex-direction:column; gap:3px">
+        <span style="font-size:13px; font-weight:800; color:#1a2330; letter-spacing:-.3px">사이트 접속 비밀번호</span>
+        <span style="font-size:11.5px; color:#7b8698">사이트 첫 접속 시 입력하는 비밀번호입니다. 변경하면 즉시 저장되며, 기존 접속 기기도 새 비밀번호를 다시 입력해야 합니다.</span>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; font-weight:800; color:#5b6779">새 비밀번호</span>
+          <input type="password" value="{{ sitePw.next }}" onChange="{{ sitePw.onNext }}" placeholder="새 비밀번호" style="border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13px; color:#1a2330">
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px">
+          <span style="font-size:12px; font-weight:800; color:#5b6779">새 비밀번호 확인</span>
+          <input type="password" value="{{ sitePw.confirm }}" onChange="{{ sitePw.onConfirm }}" placeholder="한 번 더 입력" style="border:1px solid #e2e7ef; border-radius:6px; padding:8px 10px; font-size:13px; color:#1a2330">
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px">
+        <button onClick="{{ sitePw.onSubmit }}" style="background:#1f6feb; border:none; color:#fff; padding:8px 16px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap">비밀번호 변경</button>
+        <sc-if value="{{ sitePw.hasMsg }}" hint-placeholder-val="{{ false }}">
+          <span style="{{ sitePw.msgStyle }}">{{ sitePw.msg }}</span>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #dfe4ec; border-radius:10px; overflow:hidden">
+      <div style="padding:13px 16px; background:#fde8e8; display:flex; align-items:center; justify-content:space-between; gap:12px">
+        <div style="display:flex; flex-direction:column; gap:3px">
+          <span style="display:flex; align-items:baseline; gap:8px">
+            <span style="font-size:18px; font-weight:800; letter-spacing:-.4px; color:red">금일 개봉재고 현황</span>
+            <span style="font-size:12px; font-weight:700; color:#8b6a6a">{{ stockUpdatedLabel }}</span>
+          </span>
+          <span style="font-size:11.5px; color:#7b8698">엑셀 첨부 시 입고일자·공급처·판매점·상태·통신사·모델명·색상·일련번호·단말기상태 값만 인식합니다.</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex:none">
+          <span style="font-size:11.5px; color:#8b95a6; white-space:nowrap; font-weight:700">{{ stockCountLabel }}</span>
+          <input type="file" ref="{{ stockFileInputRef }}" accept=".xlsx" onChange="{{ onStockImportFile }}" style="display:none">
+          <button onClick="{{ onTriggerStockImport }}" style="background:#1f6feb; border:none; color:#fff; padding:8px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap">엑셀 첨부하기</button>
+        </div>
+      </div>
+      <sc-if value="{{ stockImportStatus }}" hint-placeholder-val="{{ false }}">
+        <div style="{{ stockImportStatusStyle }}">{{ stockImportStatusMsg }}</div>
+      </sc-if>
+      <div style="overflow:auto; max-height:420px">
+        <table style="width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed">
+          <thead>
+            <tr style="background:#f6f8fb; color:#5b6779">
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">입고일자</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">공급처</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">판매점</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">상태</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">통신사</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">모델명</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">색상</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">일련번호</th>
+              <th style="box-sizing:border-box; padding:9px 8px; text-align:left; font-weight:800; font-size:11px; border-bottom:1px solid #e2e7ef">단말기상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ stockTableRows }}" as="r" hint-placeholder-count="3">
+              <tr>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.inDate }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.vendor }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.store }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.status }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.carrier }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; font-weight:700">{{ r.model }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.color }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.serial }}</td>
+                <td style="padding:8px 8px; border-bottom:1px solid #eef1f6; color:#4b5768">{{ r.devStatus }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{ stockEmpty }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:40px 0; text-align:center; color:#8b95a6; font-size:12.5px">첨부된 재고 데이터가 없습니다.</div>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ modal.onClose }}" style="position:fixed; inset:0; background:rgba(20,26,36,.45); z-index:50; display:flex; align-items:center; justify-content:center">
+      <div onClick="{{ modal.stop }}" style="background:#fff; border-radius:14px; width:480px; max-width:92vw; box-shadow:0 20px 60px rgba(0,0,0,.25); overflow:hidden">
+        <div style="padding:18px 22px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #eef1f6">
+          <div style="display:flex; align-items:center; gap:10px">
+            <span style="{{ modal.chipStyle }}">{{ modal.carrier }}</span>
+            <span style="font-size:11px; font-weight:800; color:#9aa4b3">{{ modal.rankLabel }}</span>
+          </div>
+          <button onClick="{{ modal.onClose }}" style="border:none; background:transparent; color:#9aa4b3; font-size:18px; line-height:1; cursor:pointer; padding:4px">×</button>
+        </div>
+        <div style="padding:20px 22px; display:flex; flex-direction:column; gap:16px">
+          <div style="align-self:flex-start; font-size:11px; font-weight:700; color:#8b95a6; background:#f6f8fb; border:1px solid #e2e7ef; border-radius:5px; padding:4px 9px">{{ modal.savedLabel }}</div>
+          <div style="display:flex; flex-direction:column; gap:4px">
+            <div style="font-size:22px; font-weight:800; letter-spacing:-.5px">{{ modal.device }}</div>
+            <div style="font-size:13px; color:#6b7788">{{ modal.vendor }} · {{ modal.plan }} · {{ modal.joinType }} / {{ modal.discLabel }}</div>
+          </div>
+
+          <div style="display:flex; align-items:flex-end; gap:7px; padding:14px 16px; background:#f7faff; border-radius:10px">
+            <span style="font-size:34px; font-weight:800; letter-spacing:-1.5px; color:#1f6feb; font-variant-numeric:tabular-nums; line-height:1">{{ modal.final }}</span>
+            <span style="font-size:14px; font-weight:700; color:#1f6feb; padding-bottom:4px">만원 (최종액)</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px">
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">리베이트</span>
+              <span style="font-size:16px; font-weight:800; font-variant-numeric:tabular-nums">{{ modal.rebate }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">프로모션</span>
+              <span style="font-size:16px; font-weight:800; color:#047857; font-variant-numeric:tabular-nums">{{ modal.supLabel }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">차감</span>
+              <span style="{{ modal.dedStyle }}">{{ modal.dedLabel }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">부가차감</span>
+              <span style="{{ modal.vasDedStyle }}">{{ modal.vasDedLabel }}</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:3px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">유치 추가금액</span>
+              <span style="{{ modal.vasAddStyle }}">{{ modal.vasAddLabel }}</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:6px; border-top:1px dashed #e2e7ef; padding-top:14px">
+            <span style="font-size:11px; color:#8b95a6; font-weight:700">부가서비스 조건</span>
+            <sc-for list="{{ modal.vasList }}" as="v" hint-placeholder-count="2">
+              <label onClick="{{ v.onToggle }}" style="{{ v.rowStyle }}">
+                <span style="display:flex; align-items:center; gap:9px; min-width:0">
+                  <span style="{{ v.boxStyle }}">{{ v.mark }}</span>
+                  <span style="font-size:12.5px; font-weight:700">{{ v.name }}</span>
+                  <span style="font-size:11px; color:#7b8698">{{ v.term }}</span>
+                </span>
+                <span style="{{ v.statusStyle }}">{{ v.statusLabel }}</span>
+              </label>
+            </sc-for>
+            <sc-if value="{{ modal.noVas }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11.5px; color:#c3ccd8">조건 없음</span>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ modal.hasMemo }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:4px; border-top:1px dashed #e2e7ef; padding-top:14px">
+              <span style="font-size:11px; color:#8b95a6; font-weight:700">비고</span>
+              <span style="font-size:12.5px; color:#4b5768; line-height:1.55; white-space:pre-wrap">{{ modal.memo }}</span>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ stockModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onCloseStockModal }}" style="position:fixed; inset:0; background:rgba(20,26,36,.45); z-index:50; display:flex; align-items:center; justify-content:center">
+      <div onClick="{{ stopClick }}" style="background:#fff; border-radius:14px; width:420px; max-width:92vw; box-shadow:0 20px 60px rgba(0,0,0,.25); overflow:hidden">
+        <div style="padding:18px 22px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #eef1f6">
+          <span style="font-size:15px; font-weight:800; letter-spacing:-.3px">개봉재고 상세</span>
+          <button onClick="{{ onCloseStockModal }}" style="border:none; background:transparent; color:#9aa4b3; font-size:18px; line-height:1; cursor:pointer; padding:4px">×</button>
+        </div>
+        <div style="padding:18px 22px 22px; display:flex; flex-direction:column; gap:10px">
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">입고일자</span><span style="font-size:13px; font-weight:700">{{ stockModal.inDate }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">공급처</span><span style="font-size:13px; font-weight:700">{{ stockModal.vendor }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">판매점</span><span style="font-size:13px; font-weight:700">{{ stockModal.store }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">상태</span><span style="font-size:13px; font-weight:700">{{ stockModal.status }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">통신사</span><span style="font-size:13px; font-weight:700">{{ stockModal.carrier }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">모델명</span><span style="font-size:13px; font-weight:700">{{ stockModal.model }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">색상</span><span style="font-size:13px; font-weight:700">{{ stockModal.color }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">일련번호</span><span style="font-size:13px; font-weight:700">{{ stockModal.serial }}</span></div>
+          <div style="display:flex; justify-content:space-between; gap:10px"><span style="font-size:12px; color:#8b95a6; font-weight:700">단말기상태</span><span style="font-size:13px; font-weight:700">{{ stockModal.devStatus }}</span></div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ noticeModalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onCloseNotice }}" style="position:fixed; inset:0; background:rgba(20,26,36,.45); z-index:50; display:flex; align-items:center; justify-content:center">
+      <div onClick="{{ stopClick }}" style="background:#fff; border-radius:14px; width:460px; max-width:92vw; max-height:80vh; box-shadow:0 20px 60px rgba(0,0,0,.25); overflow:hidden; display:flex; flex-direction:column">
+        <div style="padding:18px 22px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #eef1f6">
+          <span style="font-size:15px; font-weight:800; letter-spacing:-.3px">📢 공지사항</span>
+          <button onClick="{{ onCloseNotice }}" style="border:none; background:transparent; color:#9aa4b3; font-size:18px; line-height:1; cursor:pointer; padding:4px">×</button>
+        </div>
+        <div style="padding:16px 22px 22px; display:flex; flex-direction:column; gap:10px; overflow-y:auto">
+          <sc-for list="{{ noticeModalItems }}" as="n" hint-placeholder-count="2">
+            <div style="display:flex; gap:8px; align-items:flex-start; padding:10px 12px; background:#f6f8fb; border-radius:8px">
+              <span style="font-size:12px; color:#aab3c0; font-weight:800; white-space:nowrap">{{ n.idx }}</span>
+              <span style="font-size:13px; color:#33404f; line-height:1.6; white-space:pre-wrap">{{ n.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const CARRIERS = ["SKT", "KT", "LGU+"];
+const JOINS = ["번호이동", "기기변경"];
+const DISCS = ["공시지원금", "선택약정"];
+// 요금제 1개 = 가입유형 2개(번호이동/기기변경) × 할인유형 2개(공시/선약) = 4행 고정
+const COMBOS = [
+  { join: "번호이동", disc: "공시지원금", d: 0 },
+  { join: "번호이동", disc: "선택약정", d: -3 },
+  { join: "기기변경", disc: "공시지원금", d: -9 },
+  { join: "기기변경", disc: "선택약정", d: -12 }
+];
+const TAB_PASSWORD = "vhstbffod22@";
+const CC = { "SKT": "#c2410c", "KT": "#047857", "LGU+": "#7c3aed" };
+const CBG = { "SKT": "#fff1e8", "KT": "#e8f6f0", "LGU+": "#f2ecfd" };
+
+const PLANS = {
+  "SKT": ["베스트109", "베스트99", "베스트89", "라이트69"],
+  "LGU+": ["플러스플랜115", "플러스플랜105", "플러스플랜95", "플러스플랜85"],
+  "KT": ["110K 이상", "90K 이상", "61K이상", "37K 이상"]
+};
+
+// [통신사, 기종, 거래처, 출고가, 리베이트 4단, 프로모션(공시 적용시 전 요금제 동일), 필수부가]
+const SEED = [
+  ["SKT", "갤럭시 S25", "강남유통", 115, [52, 46, 40, 31], 6, ["v1", "v3"]],
+  ["SKT", "갤럭시 S25 울트라", "원터치통신", 178, [63, 57, 50, 39], 8, ["v1", "v3", "v5"]],
+  ["SKT", "갤럭시 Z플립7", "강남유통", 148, [58, 51, 44, 34], 7, ["v1"]],
+  ["SKT", "아이폰 16", "원터치통신", 125, [47, 42, 36, 28], 4, ["v1", "v3"]],
+  ["SKT", "아이폰 16 프로", "원터치통신", 175, [55, 49, 43, 33], 5, ["v1", "v4"]],
+  ["SKT", "갤럭시 A16", "강남유통", 47, [28, 25, 21, 17], 2, ["v2"]],
+  ["KT", "갤럭시 S25", "대성모바일", 115, [49, 44, 38, 30], 6, ["v3", "v5"]],
+  ["KT", "갤럭시 S25 울트라", "서울지사 직공급", 178, [58, 52, 45, 36], 8, ["v3"]],
+  ["KT", "갤럭시 Z플립7", "대성모바일", 148, [54, 48, 42, 33], 7, ["v3", "v5"]],
+  ["KT", "아이폰 16", "서울지사 직공급", 125, [47, 41, 35, 27], 4, ["v3", "v5"]],
+  ["KT", "아이폰 16 프로", "서울지사 직공급", 175, [51, 45, 39, 30], 5, ["v3"]],
+  ["KT", "갤럭시 A16", "대성모바일", 47, [24, 21, 18, 14], 2, []]
+];
+
+const VAS_MASTER = {
+  v1: { name: "우주패스 all", deduct: 8, term: "3개월 유지" },
+  v2: { name: "V컬러링", deduct: 3, term: "2개월 유지" },
+  v3: { name: "멤버십 플러스", deduct: 5, term: "3개월 유지" },
+  v4: { name: "스마트기기 결합", deduct: 12, term: "6개월 유지" },
+  v5: { name: "단말 보험", deduct: 6, term: "3개월 유지" }
+};
+// 부가서비스는 통신사별로 항목(이름)이 통일되고, 유치/미유치 금액만 거래처별로 다르다.
+const VAS_CATALOG_SEED = {
+  SKT: ["v1", "v2", "v3", "v4", "v5"].map(id => ({ id, name: VAS_MASTER[id].name })),
+  KT: ["v3", "v5"].map(id => ({ id, name: VAS_MASTER[id].name })),
+  "LGU+": []
+};
+function vasFor(ids) { return ids.map(id => ({ id, deduct: VAS_MASTER[id].deduct, add: 0, term: VAS_MASTER[id].term })); }
+
+// 기종 카탈로그: 통신사 공용으로 판매 기종 이름을 등록해두면 정책표 입력에서 드롭다운으로 고른다.
+const DEVICE_CATALOG_SEED = (() => {
+  const out = [];
+  const seen = new Set(); let n = 0;
+  SEED.forEach(s => {
+    const device = s[1];
+    if (!seen.has(device)) { seen.add(device); out.push({ id: "dev" + (++n), name: device }); }
+  });
+  return out;
+})();
+
+function buildRows(carrier, seed) {
+  const out = [];
+  PLANS[carrier].forEach((plan, pi) => {
+    COMBOS.forEach((c, ci) => {
+      out.push({
+        plan, planIdx: pi, comboIdx: ci,
+        joinType: c.join, discountType: c.disc,
+        rebate: Math.max(0, seed[4][pi] + c.d),
+        vas: seed[6].slice(0, pi < 2 ? seed[6].length : Math.max(0, seed[6].length - 1)),
+        addSupport: c.disc === "공시지원금" ? seed[5] : 0,
+        polDeduct: 0,
+        addNote: "",
+        memo: ""
+      });
+    });
+  });
+  return out;
+}
+
+function buildGroups() {
+  return SEED.map((s, gi) => ({
+    id: "g" + (gi + 1),
+    carrier: s[0], device: s[1], vendor: s[2], price: s[3],
+    rows: buildRows(s[0], s)
+  }));
+}
+
+// Firestore: 정책 데이터(단가/거래처/체크상태)는 사내 전체 공유 문서 하나에 저장, 실시간 동기화
+const SYNC_KEYS = ["groups", "vendors", "promoOff", "planPromoOff", "joinPromoOff", "planRankOff"];
+const LEGACY_COLLECTION = "rebateProgram"; // 이전 버전(문서 1~2개짜리 구조)에서 마이그레이션할 때만 읽음
+const STORE_COLL = "rebateStores"; // 최상위: 거래처(Store) 1개 = 문서 1개
+const CARRIER_SUB = "carriers"; // 거래처 문서 하위: 통신사 1개 = 문서 1개 (정책표/그룹 데이터가 여기 담김)
+const META_COLL = "rebateMeta"; // 거래처에 속하지 않는 전역 설정(통신사별 부가서비스 항목 카탈로그)
+const VAS_CATALOG_DOC = "vasCatalog";
+const DEVICE_CATALOG_DOC = "deviceCatalog";
+const MISC_DOC = "misc";
+const STOCK_DOC = "openStock"; // 금일 개봉재고 현황 - 엑셀 첨부로 통째로 교체되는 스냅샷
+const MISC_DEFAULT = { title: "(주)이루다 - 리베이트 추천 프로그램", notices: ["이번 주 정책 업데이트 및 유의사항을 입력하세요."], creator: "국호준", version: "ver.1 (2026.08)", ktLink: "", lgLink: "", sktLink: "", policyHelp: "여기에 정책표 입력 사용방법을 작성하세요." };
+
+function whenDbReady(cb) {
+  if (window.__rebateDbV2) { cb(window.__rebateDbV2); return; }
+  const iv = setInterval(() => {
+    if (window.__rebateDbV2) { clearInterval(iv); cb(window.__rebateDbV2); }
+  }, 100);
+}
+
+const SITE_PASSWORD = "dlfnekghwns";
+const SITE_PASSWORD_KEY = "rebateV2_unlocked";
+function sitePwTag(pw) {
+  if (pw === SITE_PASSWORD) return "1";
+  let h = 5381; for (let i = 0; i < pw.length; i++) h = ((h << 5) + h + pw.charCodeAt(i)) | 0;
+  return "h" + (h >>> 0).toString(36);
+}
+
+class Component extends DCLogic {
+  componentDidMount() {
+    if (localStorage.getItem(SITE_PASSWORD_KEY)) {
+      this.setState({ unlocked: true });
+    }
+    this._noticeTimer = setInterval(() => this.setState(s => ({ noticeIdx: (s.noticeIdx || 0) + 1 })), 6000);
+    this._suppressWrite = false;
+    this._dbReady = false;
+    this._lastStores = null; // {vendorId: json} 마지막으로 서버와 일치시킨 거래처 문서
+    this._lastCarriers = null; // {"vendorId::carrier": json} 마지막으로 일치시킨 통신사 하위문서
+    this._lastCarrierKeys = new Set();
+    this._lastLogsJson = null;
+    whenDbReady((db) => {
+      this._dbReady = true;
+      this._initFirestore(db);
+      this._initApplyLogs(db);
+    });
+  }
+  _logsMap(panels) {
+    const out = {};
+    Object.keys(panels || {}).forEach(k => { const p = panels[k]; if (p && p.log && p.log.length) out[k] = p.log; });
+    return out;
+  }
+  _initApplyLogs(db) {
+    if (window.__rebateApplyLogsUnsub) { window.__rebateApplyLogsUnsub(); }
+    this._logsRef = db.collection(META_COLL).doc("applyLogs");
+    window.__rebateApplyLogsUnsub = this._logsRef.onSnapshot(snap => {
+      const logs = (snap.exists && snap.data().logs) || {};
+      const json = JSON.stringify(logs);
+      this._logsReady = true;
+      if (json === this._lastLogsJson) return;
+      this._lastLogsJson = json;
+      this.setState(s => {
+        const panels = Object.assign({}, s.applyPanels);
+        Object.keys(panels).forEach(k => { if (!logs[k] && panels[k].log && panels[k].log.length) panels[k] = Object.assign({}, panels[k], { log: [] }); });
+        Object.keys(logs).forEach(k => { panels[k] = Object.assign({ device: [], plan: [], join: [], disc: [], amount: "", openField: null }, panels[k], { log: logs[k] }); });
+        return { applyPanels: panels };
+      });
+    }, () => {});
+  }
+  _storesDirty() {
+    return !!this._storesDirtyFlag;
+    const state = this.state;
+    const stores = {}, carriers = {};
+    state.vendors.forEach((v, i) => {
+      stores[v.id] = this._buildStoreDoc(v, i);
+      CARRIERS.forEach(c => { const key = v.id + "::" + c; const doc = this._buildCarrierDoc(v, c, state);
+        const hasData = doc.groups.length || Object.keys(doc.promoOff).length || Object.keys(doc.planPromoOff).length || Object.keys(doc.joinPromoOff).length || Object.keys(doc.planRankOff).length;
+        if (hasData || this._lastCarrierKeys.has(key)) carriers[key] = doc; });
+    });
+    const ls = Object.keys(this._lastStores), lc = this._lastCarriers || {};
+    if (ls.length !== Object.keys(stores).length || ls.some(id => !stores[id] || this._lastStores[id] !== JSON.stringify(stores[id]))) return true;
+    return Object.keys(carriers).some(k => lc[k] !== JSON.stringify(carriers[k])) || Object.keys(lc).some(k => !carriers[k]);
+  }
+  // 수정 중(저장 전)에 다른 PC가 같은 문서를 바꾸면 기록해두고, 저장 시 덮어쓰기 전에 경고한다.
+  _noteRemote(snap, kind) {
+    const stable = o => JSON.stringify(o, (k, v) => (v && typeof v === "object" && !Array.isArray(v)) ? Object.keys(v).sort().reduce((a, x) => { a[x] = v[x]; return a; }, {}) : v);
+    if (!this._remoteConflicts) this._remoteConflicts = new Set();
+    snap.forEach(doc => {
+      const key = kind === "store" ? doc.id : doc.ref.parent.parent.id + "::" + doc.id;
+      const last = (kind === "store" ? this._lastStores : this._lastCarriers) || {};
+      let prev = null; try { prev = last[key] ? stable(JSON.parse(last[key])) : null; } catch (e) {}
+      if (prev !== stable(doc.data())) this._remoteConflicts.add(kind === "store" ? doc.id : doc.ref.parent.parent.id);
+    });
+  }
+  _initFirestore(db) {
+    // 전역에 리스너를 1세트만 유지 - 컴포넌트가 여러 번 마운트/재시도되어도 같은 컬렉션에
+    // 두 번째 구독이 붙으면 suppressWrite 경쟁으로 read/write가 서로 되풀이되는 루프가 생긴다.
+    if (window.__rebateStoresUnsub) { window.__rebateStoresUnsub(); }
+    if (window.__rebateCarriersUnsub) { window.__rebateCarriersUnsub(); }
+    try {
+      const storesRef = db.collection(STORE_COLL);
+      window.__rebateStoresUnsub = this._unsubStores = storesRef.onSnapshot(snap => {
+        // 오프라인/캐시 스냅샷은 비어 보일 수 있다 - 이것을 "서버가 비었다"로 오인해 시드 데이터로 덮어쓰던 사고 방지
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (snap.empty) { console.warn("rebateStores 비어있음 - 자동 시드는 하지 않음"); return; }
+        if (this._storesDirty()) { this._noteRemote(snap, "store"); return; }
+        this._remoteConflicts = new Set();
+        const list = [];
+        const lastStores = {};
+        snap.forEach(doc => {
+          const d = doc.data();
+          lastStores[doc.id] = JSON.stringify(d);
+          list.push({ id: doc.id, order: d.order || 0, name: d.name, carrier: d.carrier, manager: d.manager, phone: d.phone, settle: d.settle, note: d.note, vas: d.vas || [], visible: d.visible !== false, savedAt: d.savedAt || null });
+        });
+        list.sort((a, b) => a.order - b.order);
+        this._lastStores = lastStores;
+        this._suppressWrite = true;
+        // 'off'(부가서비스 유치 여부)는 사용자 로컬 조회 조건이라 서버 데이터로 덮어쓰지 않는다.
+        this.setState({ vendors: list.map(v => ({ id: v.id, name: v.name, carrier: v.carrier, manager: v.manager, phone: v.phone, settle: v.settle, note: v.note, vas: v.vas, visible: v.visible, savedAt: v.savedAt || null })) }, () => { this._suppressWrite = false; });
+      }, () => {});
+      window.__rebateCarriersUnsub = this._unsubCarriers = db.collectionGroup(CARRIER_SUB).onSnapshot(snap => {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (this._storesDirty()) { this._noteRemote(snap, "carrier"); return; }
+        const groups = [];
+        const promoOff = {}, planPromoOff = {}, joinPromoOff = {}, planRankOff = {};
+        const lastCarriers = {}; const lastKeys = new Set();
+        snap.forEach(doc => {
+          const d = doc.data();
+          const vendorId = doc.ref.parent.parent.id;
+          const key = vendorId + "::" + doc.id;
+          lastCarriers[key] = JSON.stringify(d);
+          lastKeys.add(key);
+          (d.groups || []).forEach(g => groups.push(g));
+          Object.assign(promoOff, d.promoOff || {});
+          Object.assign(planPromoOff, d.planPromoOff || {});
+          Object.assign(joinPromoOff, d.joinPromoOff || {});
+          Object.assign(planRankOff, d.planRankOff || {});
+        });
+        this._lastCarriers = lastCarriers;
+        this._lastCarrierKeys = lastKeys;
+        this._suppressWrite = true;
+        this.setState({ groups, promoOff, planPromoOff, joinPromoOff, planRankOff }, () => { this._suppressWrite = false; });
+      }, () => {});
+      if (window.__rebateVasCatalogUnsub) { window.__rebateVasCatalogUnsub(); }
+      window.__rebateVasCatalogUnsub = this._unsubVasCatalog = db.collection(META_COLL).doc(VAS_CATALOG_DOC).onSnapshot(snap => {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (!snap.exists) { this._migrateVasCatalogIfNeeded(db); return; }
+        const cat = Object.assign({ SKT: [], KT: [], "LGU+": [] }, snap.data().catalog || {});
+        if (this._lastVasCatalog !== undefined && this._lastVasCatalog !== JSON.stringify(this.state.vasCatalog || {})) return;
+        this._lastVasCatalog = JSON.stringify(cat);
+        this._vasCatalogReady = true;
+        this._suppressWrite = true;
+        this.setState({ vasCatalog: cat }, () => { this._suppressWrite = false; });
+      }, () => {});
+      if (window.__rebateDeviceCatalogUnsub) { window.__rebateDeviceCatalogUnsub(); }
+      window.__rebateDeviceCatalogUnsub = this._unsubDeviceCatalog = db.collection(META_COLL).doc(DEVICE_CATALOG_DOC).onSnapshot(snap => {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (!snap.exists) { this._migrateDeviceCatalogIfNeeded(db); return; }
+        const raw = snap.data().catalog || [];
+        // 구버전(통신사별 객체) 문서를 만나면 한 번만 평탄화한다.
+        const cat = Array.isArray(raw) ? raw : Object.keys(raw).reduce((acc, k) => {
+          (raw[k] || []).forEach(it => { if (!acc.some(x => x.name === it.name)) acc.push(it); });
+          return acc;
+        }, []);
+        if (this._lastDeviceCatalog !== undefined && this._lastDeviceCatalog !== JSON.stringify(this.state.deviceCatalog || {})) return;
+        this._lastDeviceCatalog = JSON.stringify(cat);
+        this._deviceCatalogReady = true;
+        this._suppressWrite = true;
+        this.setState({ deviceCatalog: cat }, () => { this._suppressWrite = false; });
+      }, () => {});
+      if (window.__rebateStockUnsub) { window.__rebateStockUnsub(); }
+      window.__rebateStockUnsub = this._unsubStock = db.collection(META_COLL).doc(STOCK_DOC).onSnapshot(snap => {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        const rows = snap.exists ? (snap.data().rows || []) : [];
+        const updatedAt = snap.exists ? (snap.data().updatedAt || null) : null;
+        if (this._lastStock !== undefined && this._lastStock !== JSON.stringify(this.state.stockRows || [])) return;
+        this._lastStock = JSON.stringify(rows);
+        this._stockReady = true;
+        this._suppressWrite = true;
+        this.setState({ stockRows: rows, stockUpdatedAt: updatedAt }, () => { this._suppressWrite = false; });
+      }, () => {});
+      if (window.__rebateMiscUnsub) { window.__rebateMiscUnsub(); }
+      window.__rebateMiscUnsub = this._unsubMisc = db.collection(META_COLL).doc(MISC_DOC).onSnapshot(snap => {
+        if (snap.metadata && snap.metadata.fromCache) return;
+        if (!snap.exists) {
+          this._lastMisc = JSON.stringify(MISC_DEFAULT);
+          this._miscReady = true;
+          return;
+        }
+        const raw = snap.data();
+        const misc = Object.assign({}, MISC_DEFAULT, raw);
+        if (!Array.isArray(misc.notices) || !misc.notices.length) {
+          misc.notices = (raw && typeof raw.notice === "string" && raw.notice.trim()) ? [raw.notice] : MISC_DEFAULT.notices.slice();
+        }
+        delete misc.notice;
+        if (this._lastMisc !== undefined && this._lastMisc !== JSON.stringify(Object.assign({}, MISC_DEFAULT, this.state.misc || {}))) return;
+        this._lastMisc = JSON.stringify(misc);
+        this._miscReady = true;
+        this._suppressWrite = true;
+        const pwTag = localStorage.getItem(SITE_PASSWORD_KEY);
+        const relock = pwTag && pwTag !== sitePwTag(misc.sitePassword || SITE_PASSWORD);
+        if (relock) localStorage.removeItem(SITE_PASSWORD_KEY);
+        this.setState(relock ? { misc, unlocked: false } : { misc }, () => { this._suppressWrite = false; });
+      }, () => {});
+    } catch (e) {}
+  }
+  // vasCatalog 문서가 아직 없으면(신규 기능 최초 적용) 이미 저장된 거래처들의 부가서비스 이름을
+  // 통신사별로 모아 중복 제거한 카탈로그를 만들고, 각 거래처의 vas 항목이 그 카탈로그 id를
+  // 참조하도록 다시 써준다. 이후로는 이름이 아니라 카탈로그 id로만 연결된다.
+  _migrateVasCatalogIfNeeded(db) {
+    if (this._catalogMigrating) return;
+    this._catalogMigrating = true;
+    db.collection(META_COLL).doc(VAS_CATALOG_DOC).get().then(snap => {
+      if (snap.exists) return;
+      return db.collection(STORE_COLL).get().then(storesSnap => {
+        if (storesSnap.empty) return;
+        const catalog = { SKT: [], KT: [], "LGU+": [] };
+        const seen = {}; let n = 1;
+        const rewrites = {};
+        storesSnap.forEach(doc => {
+          const d = doc.data();
+          const carrier = CARRIERS.indexOf(d.carrier) >= 0 ? d.carrier : "SKT";
+          const newVas = (d.vas || []).map(item => {
+            const name = (item.name || "").trim() || "부가서비스";
+            const key = carrier + "::" + name;
+            let cid = seen[key];
+            if (!cid) { cid = "cat" + (n++); seen[key] = cid; catalog[carrier].push({ id: cid, name }); }
+            return { id: cid, deduct: item.deduct || 0, add: item.add || 0, term: item.term || "" };
+          });
+          rewrites[doc.id] = newVas;
+        });
+        const batch = db.batch();
+        batch.set(db.collection(META_COLL).doc(VAS_CATALOG_DOC), { catalog });
+        Object.keys(rewrites).forEach(id => { batch.update(db.collection(STORE_COLL).doc(id), { vas: rewrites[id] }); });
+        return batch.commit();
+      });
+    }).catch(err => { console.error("VAS 카탈로그 마이그레이션 실패", err); })
+      .finally(() => { this._catalogMigrating = false; });
+  }
+  _syncVasCatalog(db) {
+    if (!this._vasCatalogReady) return Promise.resolve();
+    const json = JSON.stringify(this.state.vasCatalog || {});
+    if (this._lastVasCatalog === json) return Promise.resolve();
+    this._lastVasCatalog = json;
+    return db.collection(META_COLL).doc(VAS_CATALOG_DOC).set({ catalog: this.state.vasCatalog || {} })
+      .catch(err => { console.error("카탈로그 저장 실패", err); });
+  }
+  // deviceCatalog 문서가 아직 없으면 기존 정책표(carriers 하위 groups)에 쓰인 기종명을
+  // 통신사별로 모아 중복 제거해 최초 카탈로그로 만든다. 기종 데이터 자체는 이름 문자열이라 별도 rewrite는 불필요.
+  _migrateDeviceCatalogIfNeeded(db) {
+    if (this._deviceCatalogMigrating) return;
+    this._deviceCatalogMigrating = true;
+    db.collection(META_COLL).doc(DEVICE_CATALOG_DOC).get().then(snap => {
+      if (snap.exists) return;
+      return db.collectionGroup(CARRIER_SUB).get().then(carriersSnap => {
+        if (carriersSnap.empty) return;
+        const catalog = [];
+        const seen = new Set(); let n = 1;
+        carriersSnap.forEach(doc => {
+          (doc.data().groups || []).forEach(g => {
+            const name = (g.device || "").trim();
+            if (!name || seen.has(name)) return;
+            seen.add(name); catalog.push({ id: "dev" + (n++), name });
+          });
+        });
+        return db.collection(META_COLL).doc(DEVICE_CATALOG_DOC).set({ catalog });
+      });
+    }).catch(err => { console.error("기종 카탈로그 마이그레이션 실패", err); })
+      .finally(() => { this._deviceCatalogMigrating = false; });
+  }
+  _syncDeviceCatalog(db) {
+    if (!this._deviceCatalogReady) return Promise.resolve();
+    const json = JSON.stringify(this.state.deviceCatalog || {});
+    if (this._lastDeviceCatalog === json) return Promise.resolve();
+    this._lastDeviceCatalog = json;
+    return db.collection(META_COLL).doc(DEVICE_CATALOG_DOC).set({ catalog: this.state.deviceCatalog || {} })
+      .catch(err => { console.error("기종 카탈로그 저장 실패", err); });
+  }
+  _syncStock(db) {
+    const rows = this.state.stockRows || [];
+    const json = JSON.stringify(rows);
+    if (this._lastStock === json) return Promise.resolve();
+    this._lastStock = json;
+    return db.collection(META_COLL).doc(STOCK_DOC).set({ rows, updatedAt: Date.now() })
+      .catch(err => { console.error("개봉재고 저장 실패", err); });
+  }
+  _syncMisc(db) {
+    if (!this._miscReady) return Promise.resolve();
+    const misc = Object.assign({}, MISC_DEFAULT, this.state.misc || {});
+    const json = JSON.stringify(misc);
+    if (this._lastMisc === json) return Promise.resolve();
+    this._lastMisc = json;
+    return db.collection(META_COLL).doc(MISC_DOC).set(misc)
+      .catch(err => { console.error("기타관리 저장 실패", err); });
+  }
+  // 예전 버전(문서 1~2개짜리 구조)에서 마이그레이션. 새 컬렉션(rebateStores)이 비어 있을 때 1회만 실행.
+  _migrateOrSeed(db) {
+    if (this._migrating) return;
+    this._migrating = true;
+    const legacy = db.collection(LEGACY_COLLECTION);
+    Promise.all([
+      legacy.doc("shared").get().catch(() => null),
+      Promise.all(SYNC_KEYS.map(k => legacy.doc(k).get().catch(() => null)))
+    ]).then(([sharedSnap, fieldSnaps]) => {
+      const initial = {};
+      SYNC_KEYS.forEach(k => { initial[k] = this.state[k]; });
+      // 기존 서버(구 프로젝트)에서 내보낸 데이터가 있으면 legacy 컬렉션보다 먼저 채워 넣는다.
+      const seed = window.__rebateSeedDataV2;
+      if (seed) { SYNC_KEYS.forEach(k => { if (seed[k] !== undefined) initial[k] = seed[k]; }); }
+      if (sharedSnap && sharedSnap.exists) {
+        const old = sharedSnap.data();
+        SYNC_KEYS.forEach(k => { if (old[k] !== undefined) initial[k] = old[k]; });
+      }
+      fieldSnaps.forEach((snap, i) => { if (snap && snap.exists) initial[SYNC_KEYS[i]] = snap.data().value; });
+      return this._seedToFirestore(db, initial);
+    }).catch(() => { this._syncToFirestore(db); })
+      .finally(() => { this._migrating = false; });
+  }
+  // 시드/마이그레이션 데이터를 리스너(onSnapshot)가 붙기 전에 직접 한 번에 써서,
+  // 두 리스너(stores/carriers)가 각자 setState를 하며 생기는 suppressWrite 경쟁으로
+  // 일부 거래처/통신사 문서가 유실되는 문제를 피한다. 성공적으로 커밋한 뒤에만 state를 반영한다.
+  _seedToFirestore(db, data) {
+    const promoOff = data.promoOff || {}, planPromoOff = data.planPromoOff || {}, joinPromoOff = data.joinPromoOff || {}, planRankOff = data.planRankOff || {};
+    const vNames = new Set((data.vendors || []).map(v => v.name));
+    const fullState = { vendors: data.vendors || [], groups: (data.groups || []).filter(g => vNames.has(g.vendor)), promoOff, planPromoOff, joinPromoOff, planRankOff };
+    const stores = {};
+    const carriers = {};
+    fullState.vendors.forEach((v, i) => {
+      stores[v.id] = this._buildStoreDoc(v, i);
+      CARRIERS.forEach(c => {
+        const doc = this._buildCarrierDoc(v, c, fullState);
+        const hasData = doc.groups.length || Object.keys(doc.promoOff).length || Object.keys(doc.planPromoOff).length || Object.keys(doc.joinPromoOff).length || Object.keys(doc.planRankOff).length;
+        if (hasData) carriers[v.id + "::" + c] = doc;
+      });
+    });
+    const batch = db.batch();
+    Object.keys(stores).forEach(id => { batch.set(db.collection(STORE_COLL).doc(id), stores[id]); });
+    Object.keys(carriers).forEach(key => {
+      const parts = key.split("::");
+      batch.set(db.collection(STORE_COLL).doc(parts[0]).collection(CARRIER_SUB).doc(parts[1]), carriers[key]);
+    });
+    const commit = Object.keys(stores).length ? batch.commit() : Promise.resolve();
+    return commit.then(() => {
+      this._lastStores = {}; Object.keys(stores).forEach(id => { this._lastStores[id] = JSON.stringify(stores[id]); });
+      this._lastCarriers = {}; Object.keys(carriers).forEach(key => { this._lastCarriers[key] = JSON.stringify(carriers[key]); });
+      this._lastCarrierKeys = new Set(Object.keys(carriers));
+      this._suppressWrite = true;
+      this.setState(fullState, () => { this._suppressWrite = false; });
+      if (!this._vasCatalogReady) this._migrateVasCatalogIfNeeded(db);
+      if (!this._deviceCatalogReady) this._migrateDeviceCatalogIfNeeded(db);
+    }).catch(err => { console.error("시드 저장 실패", err); this._suppressWrite = false; });
+  }
+  _buildStoreDoc(vendor, order) {
+    return { order, name: vendor.name, carrier: vendor.carrier || "SKT", manager: vendor.manager || "", phone: vendor.phone || "", settle: vendor.settle || "", note: vendor.note || "", savedAt: vendor.savedAt || null, visible: vendor.visible !== false, vas: (vendor.vas || []).map(x => { const cat = ((this.state.vasCatalog || {})[vendor.carrier || "SKT"] || []).find(c => c.id === x.id); const nm = cat ? cat.name : x.name; return nm ? Object.assign({}, x, { name: nm }) : x; }) };
+  }
+  _buildCarrierDoc(vendor, carrierCode, state) {
+    const prefix = vendor.name + "::" + carrierCode + "::";
+    const groups = state.groups.filter(g => g.vendor === vendor.name && g.carrier === carrierCode);
+    const promoOff = {}, planPromoOff = {}, joinPromoOff = {}, planRankOff = {};
+    Object.keys(state.planRankOff || {}).forEach(k => { if (k.indexOf(prefix) === 0) planRankOff[k] = true; });
+    Object.keys(state.promoOff).forEach(k => { if (k.indexOf(prefix) === 0) promoOff[k] = true; });
+    Object.keys(state.planPromoOff).forEach(k => { if (k.indexOf(prefix) === 0) planPromoOff[k] = true; });
+    Object.keys(state.joinPromoOff).forEach(k => { if (k.indexOf(prefix) === 0) joinPromoOff[k] = true; });
+    return { groups, promoOff, planPromoOff, joinPromoOff, planRankOff };
+  }
+  // 거래처(Store) 단위로 최상위 문서를 나누고, 거래처 안에서도 통신사(SKT/KT/LG) 단위로
+  // carriers 하위 컬렉션을 나눈다. 매번 전체를 덮어쓰지 않고, 마지막으로 서버와 일치시킨
+  // 내용과 비교해 실제로 바뀐 거래처/통신사 문서만 writeBatch로 묶어 커밋한다.
+  _syncToFirestore(db) {
+    const state = this.state;
+    const stores = {};
+    const carriers = {};
+    state.vendors.forEach((v, i) => {
+      stores[v.id] = this._buildStoreDoc(v, i);
+      CARRIERS.forEach(c => {
+        const doc = this._buildCarrierDoc(v, c, state);
+        const hasData = doc.groups.length || Object.keys(doc.promoOff).length || Object.keys(doc.planPromoOff).length || Object.keys(doc.joinPromoOff).length || Object.keys(doc.planRankOff).length;
+        const key = v.id + "::" + c;
+        if (hasData || this._lastCarrierKeys.has(key)) carriers[key] = doc;
+      });
+    });
+    const removedVendorIds = this._lastStores ? Object.keys(this._lastStores).filter(id => !stores[id]) : [];
+    const batch = db.batch();
+    let any = false;
+    Object.keys(stores).forEach(id => {
+      const json = JSON.stringify(stores[id]);
+      if (!this._lastStores || this._lastStores[id] !== json) { batch.set(db.collection(STORE_COLL).doc(id), stores[id]); any = true; }
+    });
+    removedVendorIds.forEach(id => {
+      batch.delete(db.collection(STORE_COLL).doc(id));
+      CARRIERS.forEach(c => batch.delete(db.collection(STORE_COLL).doc(id).collection(CARRIER_SUB).doc(c)));
+      any = true;
+    });
+    Object.keys(carriers).forEach(key => {
+      const json = JSON.stringify(carriers[key]);
+      if (!this._lastCarriers || this._lastCarriers[key] !== json) {
+        const parts = key.split("::");
+        batch.set(db.collection(STORE_COLL).doc(parts[0]).collection(CARRIER_SUB).doc(parts[1]), carriers[key]);
+        any = true;
+      }
+    });
+    this._lastStores = {}; Object.keys(stores).forEach(id => { this._lastStores[id] = JSON.stringify(stores[id]); });
+    this._lastCarriers = {}; Object.keys(carriers).forEach(key => { this._lastCarriers[key] = JSON.stringify(carriers[key]); });
+    this._lastCarrierKeys = new Set(Object.keys(carriers));
+    if (!any) return Promise.resolve();
+    return batch.commit().catch(err => { console.error("Firestore 저장 실패", err); throw err; });
+  }
+  componentWillUnmount() {
+    if (this._unsubStores) this._unsubStores();
+    if (this._unsubCarriers) this._unsubCarriers();
+    if (this._unsubVasCatalog) this._unsubVasCatalog();
+    if (this._unsubDeviceCatalog) this._unsubDeviceCatalog();
+    if (this._unsubMisc) this._unsubMisc();
+    if (this._noticeTimer) clearInterval(this._noticeTimer);
+  }
+  // 자동저장 없음 - "지금 저장" 버튼(manualSave)을 눌러야만 Firestore에 쓴다.
+  componentDidUpdate(pp, ps) {
+    const s = this.state;
+    if (ps && ps.applyPanels !== s.applyPanels && this._logsReady && this._logsRef) {
+      const logs = this._logsMap(s.applyPanels), json = JSON.stringify(logs);
+      if (json !== this._lastLogsJson) { this._lastLogsJson = json; this._logsRef.set({ logs, updatedAt: Date.now() }).catch(() => {}); }
+    }
+    if (!this._suppressWrite && ps && (ps.vendors !== s.vendors || ps.groups !== s.groups || ps.promoOff !== s.promoOff || ps.planPromoOff !== s.planPromoOff || ps.joinPromoOff !== s.joinPromoOff || ps.planRankOff !== s.planRankOff)) this._storesDirtyFlag = true;
+  }
+  submitPw() {
+    if (this.state.pwDraft === TAB_PASSWORD) { this.setState({ tabUnlocked: true, pwDraft: "", pwError: false }); }
+    else { this.setState({ pwError: true }); }
+  }
+  manualSave = () => {
+    const db = window.__rebateDbV2;
+    if (!db) { this.setState({ saveStatus: "error" }); return; }
+    if (!this._lastStores) { window.alert("서버에서 최신 데이터를 아직 받지 못했습니다(오프라인 또는 연결 중). 연결 후 새로고침하고 다시 저장하세요."); return; }
+    const conf = Array.from(this._remoteConflicts || []);
+    if (conf.length) {
+      const names = conf.map(id => { const v = this.state.vendors.find(x => x.id === id); return v ? v.name : id; }).join(", ");
+      if (!window.confirm("이 창에서 수정하는 동안 다른 PC에서 아래 거래처 데이터가 변경되었습니다.\n" + names + "\n\n지금 저장하면 해당 변경이 이 창의 (오래된) 내용으로 덮어써질 수 있습니다.\n계속 저장할까요? (취소 후 새로고침하면 최신 데이터를 불러옵니다)")) return;
+    }
+    this.setState(s => {
+      const sheet = s.tab === "policy" ? s.sheet : null;
+      const vendors = sheet ? s.vendors.map(v => v.name === sheet ? Object.assign({}, v, { savedAt: Date.now() }) : v) : s.vendors;
+      return { saveStatus: "saving", vendors };
+    }, () => {
+    Promise.resolve(this._syncVasCatalog(db)).then(() => this._syncToFirestore(db)).then(() => { this._storesDirtyFlag = false; this._remoteConflicts = new Set(); }).then(() => this._syncDeviceCatalog(db)).then(() => this._syncMisc(db)).then(() => this._syncStock(db))
+      .then(() => { this.setState({ saveStatus: "saved" }); clearTimeout(this._saveStatusTimer); this._saveStatusTimer = setTimeout(() => this.setState(s => s.saveStatus === "saved" ? { saveStatus: "idle" } : null), 1500); })
+      .catch(() => { this.setState({ saveStatus: "error" }); });
+    });
+  }
+  truncateRebate = () => {
+    const sheet = this.state.sheet;
+    if (!sheet) return;
+    if (!window.confirm("현재 거래처(" + sheet + ") 정책표의 모든 원정책 값 뒷자리 1자리를 잘라냅니다. 계속할까요?")) return;
+    this.setState(s => ({
+      groups: s.groups.map(g => g.vendor !== sheet ? g : Object.assign({}, g, {
+        rows: g.rows.map(r => Object.assign({}, r, { rebate: Math.trunc(this.n(r.rebate) / 10) }))
+      }))
+    }));
+  };
+  fileInputRef = React.createRef();
+  stockFileInputRef = React.createRef();
+  triggerStockImport = () => { this.setState({ stockImportStatus: null }); if (this.stockFileInputRef.current) this.stockFileInputRef.current.click(); };
+  onStockImportFile = e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (file) this.runStockImport(file);
+  };
+  async runStockImport(file) {
+    this.setState({ stockImportStatus: { kind: "busy", msg: "엑셀 읽는 중…" } });
+    try {
+      const buf = await file.arrayBuffer();
+      const rows = await window.readXlsxSheetRows(buf);
+      const get = (r, c) => (r[c] ? String(r[c].value || "").trim() : "");
+      const out = [];
+      // 1행은 헤더. A=입고일자, B=공급처, F=판매점, G=상태, J=통신사, M=모델명, N=색상, O=일련번호, T=단말기상태.
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const serial = get(r, 15);
+        if (!serial) continue;
+        out.push({
+          inDate: get(r, 1), vendor: get(r, 2), store: get(r, 6), status: get(r, 7),
+          carrier: get(r, 10), model: get(r, 13), color: get(r, 14), serial, devStatus: get(r, 20)
+        });
+      }
+      if (!out.length) throw new Error("인식할 재고 데이터가 없습니다. 첨부 양식을 확인해주세요.");
+      this.setState({ stockRows: out, stockImportStatus: { kind: "success", msg: out.length + "건 인식 완료 · 우측 상단 \"지금 저장\"을 눌러야 반영됩니다." } });
+    } catch (err) {
+      this.setState({ stockImportStatus: { kind: "error", msg: (err && err.message) || String(err) } });
+    }
+  }
+  triggerImport = () => { this.setState({ importStatus: null }); if (this.fileInputRef.current) this.fileInputRef.current.click(); };
+  onImportFile = e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (file) this.runImport(file);
+  };
+  async runImport(file) {
+    this.setState({ importStatus: { kind: "busy", msg: "엑셀 읽는 중…" } });
+    try {
+      const buf = await file.arrayBuffer();
+      const grid = await window.readXlsxCostGrid(buf);
+      const norm = s => (s || "").replace(/\s+/g, "");
+      let carrier = null;
+      for (const c of CARRIERS) {
+        const planSeq = PLANS[c].map(norm);
+        const excelSeq = [];
+        grid.columns.forEach(cm => { const p = norm(cm.plan); if (excelSeq.indexOf(p) === -1) excelSeq.push(p); });
+        if (planSeq.length === excelSeq.length && planSeq.every((p, i) => p === excelSeq[i])) { carrier = c; break; }
+      }
+      if (!carrier) throw new Error("요금제 구성이 일치하는 통신사를 찾지 못했습니다. 첨부 양식을 확인해주세요.");
+      const joinMap = { MNP: "번호이동", "번호이동": "번호이동", "기변": "기기변경", "기기변경": "기기변경" };
+      const discMap = { "공시": "공시지원금", "공시지원금": "공시지원금", "선약": "선택약정", "선택약정": "선택약정" };
+      const sheet = this.state.sheet;
+      let applied = 0, skippedColor = 0;
+      const matchedDevices = [];
+      const nextGroups = this.state.groups.map(g => {
+        if (g.vendor !== sheet || g.carrier !== carrier) return g;
+        const match = grid.deviceRows.find(dr => norm(dr.device) === norm(g.device));
+        if (!match) return g;
+        matchedDevices.push(g.device);
+        let rowsChanged = false;
+        const rows = g.rows.map(r => {
+          const cell = match.values.find(v => norm(v.plan) === norm(PLANS[carrier][r.planIdx]) && joinMap[v.join] === r.joinType && discMap[v.disc] === r.discountType);
+          if (!cell || cell.value == null) return r;
+          if (!cell.black) { skippedColor++; return r; }
+          rowsChanged = true; applied++;
+          return Object.assign({}, r, { rebate: cell.value });
+        });
+        return rowsChanged ? Object.assign({}, g, { rows }) : g;
+      });
+      const notFound = grid.deviceRows.map(d => d.device).filter(d => matchedDevices.indexOf(d) === -1);
+      if (applied === 0) throw new Error("일치하는 기종이 없어 적용된 값이 없습니다. 기종명을 정책표와 맞춰주세요.");
+      let msg = carrier + " · " + matchedDevices.length + "개 기종 · " + applied + "개 값 적용";
+      if (skippedColor) msg += " · 색상 있는 셀 " + skippedColor + "개 제외";
+      if (notFound.length) msg += " · 시트에 없는 기종 " + notFound.length + "개 건너뜀(" + notFound.slice(0, 3).join(", ") + (notFound.length > 3 ? " 외" : "") + ")";
+      this.setState({ groups: nextGroups, importStatus: { kind: "success", msg } });
+    } catch (err) {
+      this.setState({ importStatus: { kind: "error", msg: (err && err.message) || String(err) } });
+    }
+  }
+  state = {
+    tab: "search",
+    sheet: "",
+    saveStatus: "idle", // idle | saving | saved | error - 상단 저장 버튼 피드백용. 자동저장은 개녁적으로 거드난데, 저장이 적용뒠는지 눀곀 확인하고 싶을 때 누늤다.
+    tabUnlocked: false, unlocked: false, // 정책표 입력·거래처 관리 탭 잠금 해제 여부 - 새로고침 전까지 유지, 서버에 저장되지 않음
+    pwDraft: "",
+    pwError: false,
+    selected: null,
+    stockSelected: null,
+    confirmDeleteVendor: null,
+    rowLimit: 50,
+    f: { carrier: "전체", device: "전체", plan: "전체", join: "전체", disc: "전체", vendor: "전체" },
+    stockRows: [], // 금일 개봉재고 현황 - 엑셀 첨부로 통째로 교체
+    stockSort: { key: "carrier", dir: 1 }, // { key: "carrier"|"model", dir: 1|-1 }
+    stockUpdatedAt: null,
+    stockImportStatus: null,
+    off: {},
+    promoOff: {},
+    planPromoOff: {},
+    joinPromoOff: {},
+    planRankOff: {},
+    // 프로모션/차감 적용기 UI 상태(선택값·금액·적용 로그) - 서버 동기화 대상 아님, 실제 값은 groups.rows에 누적 반영됨
+    // 거래처(+통신사)별로 독립되도록 "거래처::통신사::add" 같은 키로 분리해서 보관한다.
+    applyPanels: {
+    },
+    vasCatalog: VAS_CATALOG_SEED,
+    deviceCatalog: DEVICE_CATALOG_SEED,
+    misc: MISC_DEFAULT,
+    importStatus: null,
+    noticeIdx: 0,
+    vendors: [
+      { id: "d1", name: "강남유통", carrier: "SKT", manager: "박성호", phone: "010-2841-7712", settle: "매월 25일", note: "번호이동 정책 강세. 부가 2종 필수 조건 많음.", vas: vasFor(["v1", "v2", "v3"]) },
+      { id: "d2", name: "대성모바일", carrier: "KT", manager: "이가온", phone: "010-3320-4408", settle: "매월 10일", note: "기기변경 단가 안정적. 추가지원금 협의 가능.", vas: vasFor(["v3", "v5"]) },
+      { id: "d4", name: "원터치통신", carrier: "SKT", manager: "최도현", phone: "010-4415-6633", settle: "매월 말일", note: "보험 유치 조건 엄격, 미유치 차감 큼.", vas: vasFor(["v1", "v3", "v4", "v5"]) },
+      { id: "d5", name: "서울지사 직공급", carrier: "KT", manager: "본사 유통팀", phone: "02-556-1180", settle: "매월 5일", note: "정책 변동 적음. 리베이트는 평균 수준.", vas: vasFor(["v3", "v5"]) }
+    ],
+    groups: buildGroups()
+  };
+
+  n(v) { const x = parseFloat(String(v).replace(/[^\d.-]/g, "")); return isNaN(x) ? 0 : x; }
+
+  // 부동소수점 연산(0.1+0.2 등) 누적 시 생기는 소수점 오차 제거용 라운딩
+  r(x) { return Math.round((x + Number.EPSILON) * 100) / 100; }
+
+  promoKey(carrier, planIdx, join, disc, vendor) { return vendor + "::" + carrier + "::" + planIdx + "::" + join + "::" + disc; }
+  planKey(carrier, planIdx, vendor) { return vendor + "::" + carrier + "::" + planIdx; }
+  joinKey(carrier, planIdx, join, vendor) { return vendor + "::" + carrier + "::" + planIdx + "::" + join; }
+  isPromoOn(key) { return !this.state.promoOff[key]; }
+  // 요금제/가입유형/할인유형 체크박스는 서로 독립적으로 동작한다 - 하위 항목을 해제해도
+  // 상위(요금제, 가입유형) 체크박스 표시 상태는 바뀌지 않는다.
+  toggleRankPlan(carrier, pi, vendor) {
+    const pk = this.planKey(carrier, pi, vendor);
+    this.setState(s => { const o = Object.assign({}, s.planRankOff); if (o[pk]) delete o[pk]; else o[pk] = true; return { planRankOff: o }; });
+  }
+  togglePlanGroup(carrier, pi, vendor) {
+    const pk = this.planKey(carrier, pi, vendor);
+    this.setState(s => {
+      const turnOn = !!s.planPromoOff[pk];
+      const planOff = Object.assign({}, s.planPromoOff);
+      const joinOff = Object.assign({}, s.joinPromoOff);
+      const off = Object.assign({}, s.promoOff);
+      if (turnOn) { delete planOff[pk]; } else { planOff[pk] = true; }
+      JOINS.forEach(j => {
+        const jk = this.joinKey(carrier, pi, j, vendor);
+        if (turnOn) { delete joinOff[jk]; } else { joinOff[jk] = true; }
+        DISCS.forEach(d => {
+          const key = this.promoKey(carrier, pi, j, d, vendor);
+          if (turnOn) { delete off[key]; } else { off[key] = true; }
+        });
+      });
+      return { planPromoOff: planOff, joinPromoOff: joinOff, promoOff: off };
+    });
+  }
+  toggleJoinGroup(carrier, pi, j, vendor) {
+    const jk = this.joinKey(carrier, pi, j, vendor);
+    this.setState(s => {
+      const turnOn = !!s.joinPromoOff[jk];
+      const joinOff = Object.assign({}, s.joinPromoOff);
+      const off = Object.assign({}, s.promoOff);
+      if (turnOn) { delete joinOff[jk]; } else { joinOff[jk] = true; }
+      DISCS.forEach(d => {
+        const key = this.promoKey(carrier, pi, j, d, vendor);
+        if (turnOn) { delete off[key]; } else { off[key] = true; }
+      });
+      return { joinPromoOff: joinOff, promoOff: off };
+    });
+  }
+  toggleDiscPromo(key) {
+    this.setState(s => {
+      const off = Object.assign({}, s.promoOff);
+      if (off[key]) { delete off[key]; } else { off[key] = true; }
+      return { promoOff: off };
+    });
+  }
+  promoHeadStyle(base) {
+    return Object.assign({}, base, { cursor: "pointer" });
+  }
+  promoCheck(on, size) {
+    return {
+      width: size, height: size, borderRadius: "3px", flex: "none",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      fontSize: (parseInt(size) - 4) + "px", fontWeight: 800, color: "#fff",
+      background: on ? "#1f6feb" : "#fff", border: on ? "1px solid #1f6feb" : "1px solid #c3ccd8"
+    };
+  }
+
+  updG(id, key, val) {
+    this.setState(s => ({ groups: s.groups.map(g => g.id === id ? Object.assign({}, g, { [key]: val }) : g) }));
+  }
+  updR(gid, idx, key, val) {
+    this.setState(s => ({
+      groups: s.groups.map(g => g.id !== gid ? g : Object.assign({}, g, {
+        rows: g.rows.map((r, i) => i === idx ? Object.assign({}, r, { [key]: val }) : r)
+      }))
+    }));
+  }
+  updVendor(id, key, val) {
+    // 거래처명이 바뀌면 정책표(groups.vendor)와 체크박스 키(promoOff 등)가 모두 "거래처 이름"
+    // 문자열로 연결되어 있으므로, 이름을 바꿀 때 관련 데이터를 전부 새 이름으로 옮겨줘야
+    // 정책표 입력값·체크상태가 거래처와 계속 연동된다. 그냥 name만 바꾸면 기존 정책표 행이
+    // 옛 이름에 묶인 채 고아가 되어 "연동이 안 되는" 증상이 생긴다.
+    if (key === "carrier") {
+      // 통신사가 바뀌면 부가서비스 드롭다운의 대상 카탈로그도 바뀌므로, 옛 통신사 카탈로그를
+      // 참조하던 부가서비스 항목을 그대로 물고 가면 안 맞는 이름을 가리키게 된다.
+      this.setState(s => ({ vendors: s.vendors.map(v => v.id === id ? Object.assign({}, v, { carrier: val, vas: [] }) : v) }));
+      return;
+    }
+    if (key === "name") {
+      this.setState(s => {
+        const oldV = s.vendors.find(v => v.id === id);
+        const oldName = oldV ? oldV.name : null;
+        const newName = val;
+        const vendors = s.vendors.map(v => v.id === id ? Object.assign({}, v, { name: newName }) : v);
+        if (!oldName || oldName === newName) return { vendors };
+        const remapKeys = obj => {
+          const out = {};
+          Object.keys(obj).forEach(k => {
+            const parts = k.split("::");
+            if (parts[0] === oldName) parts[0] = newName;
+            out[parts.join("::")] = obj[k];
+          });
+          return out;
+        };
+        return {
+          vendors,
+          groups: s.groups.map(g => g.vendor === oldName ? Object.assign({}, g, { vendor: newName }) : g),
+          promoOff: remapKeys(s.promoOff),
+          planPromoOff: remapKeys(s.planPromoOff),
+          joinPromoOff: remapKeys(s.joinPromoOff),
+          planRankOff: remapKeys(s.planRankOff || {}),
+          sheet: s.sheet === oldName ? newName : s.sheet,
+          f: Object.assign({}, s.f, { vendor: s.f.vendor === oldName ? newName : s.f.vendor })
+        };
+      });
+      return;
+    }
+    this.setState(s => ({ vendors: s.vendors.map(v => v.id === id ? Object.assign({}, v, { [key]: val }) : v) }));
+  }
+  updVendorVas(vendorId, vasId, key, val) {
+    this.setState(s => ({
+      vendors: s.vendors.map(v => v.id !== vendorId ? v : Object.assign({}, v, {
+        vas: v.vas.map(x => x.id === vasId ? Object.assign({}, x, { [key]: val }) : x)
+      }))
+    }));
+  }
+  addVendorVas(vendorId) {
+    this.setState(s => {
+      const v = s.vendors.find(x => x.id === vendorId);
+      if (!v) return null;
+      const carrier = v.carrier || "SKT";
+      const catalog = (s.vasCatalog[carrier] || []);
+      const used = new Set((v.vas || []).map(x => x.id));
+      const next = catalog.find(c => !used.has(c.id));
+      if (!next) return null; // 이 통신사에 더 추가할 항목이 없음 - 상단 "부가서비스 항목 관리"에서 먼저 등록
+      return {
+        vendors: s.vendors.map(x => x.id !== vendorId ? x : Object.assign({}, x, {
+          vas: x.vas.concat([{ id: next.id, deduct: 0, add: 0, term: "" }])
+        }))
+      };
+    });
+  }
+  delVendorVas(vendorId, vasId) {
+    this.setState(s => ({
+      vendors: s.vendors.map(v => v.id !== vendorId ? v : Object.assign({}, v, {
+        vas: v.vas.filter(x => x.id !== vasId)
+      }))
+    }));
+  }
+  updCatalogItem(carrier, id, name) {
+    this.setState(s => ({ vasCatalog: Object.assign({}, s.vasCatalog, { [carrier]: (s.vasCatalog[carrier] || []).map(x => x.id === id ? Object.assign({}, x, { name }) : x) }) }));
+  }
+  addCatalogItem(carrier) {
+    this.setState(s => ({ vasCatalog: Object.assign({}, s.vasCatalog, { [carrier]: (s.vasCatalog[carrier] || []).concat([{ id: "cat" + Date.now(), name: "새 항목" }]) }) }));
+  }
+  delCatalogItem(carrier, id) {
+    this.setState(s => ({ vasCatalog: Object.assign({}, s.vasCatalog, { [carrier]: (s.vasCatalog[carrier] || []).filter(x => x.id !== id) }) }));
+  }
+  updCatalogDevice(id, name) {
+    this.setState(s => ({ deviceCatalog: (s.deviceCatalog || []).map(x => x.id === id ? Object.assign({}, x, { name }) : x) }));
+  }
+  addCatalogDevice() {
+    this.setState(s => ({ deviceCatalog: (s.deviceCatalog || []).concat([{ id: "dev" + Date.now(), name: "새 기종" }]) }));
+  }
+  delCatalogDevice(id) {
+    this.setState(s => ({ deviceCatalog: (s.deviceCatalog || []).filter(x => x.id !== id) }));
+  }
+  matrixOf(carrier, vendor, groups, st) {
+    const headStyleBase = { padding: "8px 6px", textAlign: "center", fontSize: "11px", fontWeight: 800, color: "#5b6779", background: "#f6f8fb", borderBottom: "1px solid #e2e7ef", borderLeft: "1px solid #e2e7ef", whiteSpace: "nowrap" };
+    const labelStyle = Object.assign({}, headStyleBase, { textAlign: "left", position: "sticky", left: 0, zIndex: 2, borderLeft: "none", minWidth: "170px" });
+    const plans = PLANS[carrier];
+    const wrapStyle = { display: "flex", alignItems: "center", justifyContent: "center", gap: "5px", cursor: "pointer" };
+    const planHeads = plans.map((p, pi) => {
+      const on = !st.planPromoOff[this.planKey(carrier, pi, vendor)];
+      return {
+        label: p, cellStyle: headStyleBase, wrapStyle, boxStyle: this.promoCheck(on, "14px"), mark: on ? "✓" : "",
+        onClick: () => this.togglePlanGroup(carrier, pi, vendor),
+        rankBox: this.promoCheck(!st.planRankOff[this.planKey(carrier, pi, vendor)], "16px"),
+        rankMark: st.planRankOff[this.planKey(carrier, pi, vendor)] ? "" : "✓",
+        onRank: (e) => { e.stopPropagation(); this.toggleRankPlan(carrier, pi, vendor); }
+      };
+    });
+    const joinHeads = [];
+    plans.forEach((p, pi) => JOINS.forEach(j => {
+      const on = !st.joinPromoOff[this.joinKey(carrier, pi, j, vendor)];
+      joinHeads.push({
+        label: j, cellStyle: Object.assign({}, headStyleBase, { fontSize: "10.5px" }), wrapStyle, boxStyle: this.promoCheck(on, "13px"), mark: on ? "✓" : "",
+        onClick: () => this.toggleJoinGroup(carrier, pi, j, vendor)
+      });
+    }));
+    const discHeads = [];
+    plans.forEach((p, pi) => JOINS.forEach(j => DISCS.forEach(d => {
+      const key = this.promoKey(carrier, pi, j, d, vendor);
+      const on = this.isPromoOn(key);
+      discHeads.push({
+        label: d === "공시지원금" ? "공시" : "선약",
+        cellStyle: Object.assign({}, headStyleBase, { fontSize: "10.5px", fontWeight: 700, color: "#7b8698" }),
+        wrapStyle, boxStyle: this.promoCheck(on, "12px"), mark: on ? "✓" : "",
+        onClick: () => this.toggleDiscPromo(key)
+      });
+    })));
+    const devices = groups.map((g, gi) => {
+      const rowBg = gi % 2 ? "#fbfcfe" : "#fff";
+      const cells = [];
+      plans.forEach((plan, pi) => COMBOS.forEach((c, ci) => {
+        const idx = pi * COMBOS.length + ci;
+        const r = g.rows[idx];
+        cells.push({
+          value: r ? r.rebate : 0,
+          style: { padding: 0, textAlign: "center", borderBottom: "1px solid #eef1f6", borderLeft: "1px solid #eef1f6", background: rowBg },
+          onChange: e => this.updR(g.id, idx, "rebate", this.n(e.target.value)),
+          addLabel: "+" + (r ? this.r(this.n(r.addSupport)) : 0),
+          addLabelStyle: { fontSize: "10.5px", fontWeight: 800, color: (r && this.r(this.n(r.addSupport))) ? "#047857" : "#c3ccd8", whiteSpace: "nowrap", width: "24px", flex: "none", textAlign: "left" },
+          dedLabel2: "-" + (r ? this.r(this.n(r.polDeduct)) : 0),
+          dedLabel2Style: { fontSize: "10.5px", fontWeight: 800, color: (r && this.r(this.n(r.polDeduct))) ? "#c2410c" : "#c3ccd8", whiteSpace: "nowrap", width: "24px", flex: "none", textAlign: "left" }
+        });
+      }));
+      const catalogDevices = (st.deviceCatalog || []).map(x => x.name);
+      const deviceOpts = catalogDevices.indexOf(g.device) >= 0 || !g.device ? catalogDevices : [g.device].concat(catalogDevices);
+      return {
+        device: g.device, vendor: g.vendor, price: g.price,
+        deviceOpts,
+        vendorOpts: st.vendors.filter(v => (v.carrier || "SKT") === carrier).map(v => v.name),
+        onDevice: e => this.updG(g.id, "device", e.target.value),
+        onVendor: e => {
+          const val = e.target.value;
+          // 거래처가 바뀌면 이전 거래처의 프로모션(추가지원)/차감 값을 그대로 물고 가면 안 되므로 0으로 초기화
+          this.setState(s => ({
+            groups: s.groups.map(x => x.id !== g.id ? x : Object.assign({}, x, {
+              vendor: val,
+              rows: x.rows.map(r => Object.assign({}, r, { addSupport: 0, polDeduct: 0 }))
+            }))
+          }));
+        },
+        onPrice: e => this.updG(g.id, "price", this.n(e.target.value)),
+        onDelete: () => this.setState(s => ({ groups: s.groups.filter(x => x.id !== g.id) })),
+        nameCellStyle: { padding: "6px 8px", borderBottom: "1px solid #eef1f6", position: "sticky", left: 0, background: rowBg, zIndex: 1, minWidth: "170px" },
+        deleteCellStyle: { padding: "6px", textAlign: "center", borderBottom: "1px solid #eef1f6", background: rowBg },
+        cells
+      };
+    });
+    return { labelStyle, planHeads, joinHeads, discHeads, devices };
+  }
+
+  // 프로모션(add)/차감(ded) 적용기 카드 1개 빌드: 드롭다운(기종/요금/가입유형/할인유형) 다중선택 + 금액 입력 + 적용(누적)/초기화
+  buildApplyCard(kind, st, sheet, sheetCarrier, ownGroups) {
+    const isAdd = kind === "add";
+    const color = isAdd ? "#16a34a" : "#ea580c";
+    const bg = isAdd ? "#f0fdf4" : "#fff7ed";
+    const panelKey = sheet + "::" + sheetCarrier + "::" + kind;
+    const panel = st.applyPanels[panelKey] || { device: [], plan: [], join: [], disc: [], amount: "", openField: null, log: [] };
+    const dims = [
+      { key: "device", ph: "기종 선택", options: Array.from(new Set(ownGroups.map(g => g.device).filter(Boolean))) },
+      { key: "plan", ph: "요금 선택", options: PLANS[sheetCarrier] || [] },
+      { key: "join", ph: "가입 유형", options: JOINS },
+      { key: "disc", ph: "할인 유형", options: DISCS }
+    ];
+    const setPanel = patch => this.setState(s => ({
+      applyPanels: Object.assign({}, s.applyPanels, { [panelKey]: Object.assign({}, s.applyPanels[panelKey] || panel, patch) })
+    }));
+    const fields = dims.map(d => {
+      const sel = panel[d.key] || [];
+      const open = panel.openField === d.key;
+      return {
+        key: d.key,
+        label: sel.length ? (sel.length <= 2 ? sel.join(", ") : sel.length + "개 선택") : d.ph,
+        labelStyle: { fontSize: "12px", fontWeight: sel.length ? 800 : 500, color: sel.length ? "#1a2330" : "#94a0b3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
+        open,
+        empty: d.options.length === 0,
+        hasOptions: d.options.length > 0,
+        boxStyle: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", border: "1px solid #e2e7ef", borderRadius: "7px", padding: "7px 9px", cursor: "pointer", background: "#fff" },
+        panelStyle: { position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 30, background: "#fff", border: "1px solid #d3dae4", borderRadius: "8px", boxShadow: "0 8px 20px rgba(20,30,50,.14)", padding: "5px", maxHeight: "min(260px, 60vh)", overflowY: "auto" },
+        bulkRowStyle: { display: "flex", gap: "5px", padding: "0 2px 5px", marginBottom: "4px", borderBottom: "1px solid #eef1f6" },
+        bulkBtnStyle: { flex: 1, border: "1px solid #d3dae4", background: "#f6f8fb", color: "#4b5768", borderRadius: "5px", padding: "5px 4px", fontSize: "10.5px", fontWeight: 700, cursor: "pointer" },
+        onSelectAll: () => setPanel({ [d.key]: d.options.slice() }),
+        onDeselectAll: () => setPanel({ [d.key]: [] }),
+        onToggle: () => setPanel({ openField: open ? null : d.key }),
+        options: d.options.map(o => {
+          const checked = sel.indexOf(o) >= 0;
+          return {
+            label: o, mark: checked ? "✓" : "",
+            boxStyle: this.promoCheck(checked, "13px"),
+            rowStyle: { display: "flex", alignItems: "center", gap: "7px", padding: "6px 7px", borderRadius: "5px", cursor: "pointer", fontSize: "12px", color: "#1a2330" },
+            onClick: () => setPanel({ [d.key]: checked ? sel.filter(x => x !== o) : sel.concat([o]) })
+          };
+        })
+      };
+    });
+    const field = isAdd ? "addSupport" : "polDeduct";
+    const dimLabels = { device: "기종", plan: "요금제", join: "가입유형", disc: "할인유형" };
+    const onApply = () => {
+      const amt = this.n(panel.amount);
+      if (!amt) return;
+      const sel = { device: panel.device || [], plan: panel.plan || [], join: panel.join || [], disc: panel.disc || [] };
+      this.setState(s => {
+        let count = 0;
+        const promoOff = Object.assign({}, s.promoOff);
+        const groups = s.groups.map(g => {
+          if (g.vendor !== sheet || g.carrier !== sheetCarrier) return g;
+          if (sel.device.length && sel.device.indexOf(g.device) < 0) return g;
+          let changed = false;
+          const rows = g.rows.map(r => {
+            const match = (!sel.plan.length || sel.plan.indexOf(r.plan) >= 0) &&
+              (!sel.join.length || sel.join.indexOf(r.joinType) >= 0) &&
+              (!sel.disc.length || sel.disc.indexOf(r.discountType) >= 0);
+            if (!match) return r;
+            changed = true; count++;
+            // 프로모션(+) 적용 시, 개별 조건 체크박스에서 꺼져 있던 프로모션도 다시 켜서
+            // 리베이트 조회에 즉시 반영되게 한다.
+            if (isAdd) { delete promoOff[this.promoKey(g.carrier, r.planIdx, r.joinType, r.discountType, g.vendor)]; }
+            return Object.assign({}, r, { [field]: this.r(this.n(r[field]) + amt) });
+          });
+          return changed ? Object.assign({}, g, { rows }) : g;
+        });
+        const desc = ["device", "plan", "join", "disc"].map(k => sel[k].length ? dimLabels[k] + " " + sel[k].join("/") : null).filter(Boolean).join(" · ") || "전체 조건";
+        const logLine = desc + " → " + (isAdd ? "+" : "-") + amt + " (" + count + "건 적용)";
+        return {
+          groups,
+          promoOff,
+          applyPanels: Object.assign({}, s.applyPanels, {
+            [panelKey]: Object.assign({}, s.applyPanels[panelKey] || panel, { amount: "", log: [logLine].concat((s.applyPanels[panelKey] || panel).log || []) })
+          })
+        };
+      });
+    };
+    const onReset = () => this.setState(s => ({
+      groups: s.groups.map(g => (g.vendor === sheet && g.carrier === sheetCarrier) ? Object.assign({}, g, { rows: g.rows.map(r => Object.assign({}, r, { [field]: 0 })) }) : g),
+      applyPanels: Object.assign({}, s.applyPanels, { [panelKey]: { device: [], plan: [], join: [], disc: [], amount: "", openField: null, log: [] } })
+    }));
+    return {
+      barColor: color, title: isAdd ? "추가 프로모션 적용기" : "차감 정책조건 적용기",
+      memoTitle: isAdd ? "추가 프로모션 메모" : "차감 내역 메모",
+      fields,
+      amount: panel.amount, onAmount: e => setPanel({ amount: e.target.value }),
+      amountStyle: { width: "48px", boxSizing: "border-box", border: "1px solid " + color, borderRadius: "6px", padding: "7px 6px", fontSize: "12.5px", textAlign: "center", fontWeight: 800, color, background: bg },
+      applyLabel: isAdd ? "프로모션 적용" : "차감 적용",
+      applyBtnStyle: { flex: 1, border: "none", borderRadius: "6px", padding: "8px 6px", fontSize: "12px", fontWeight: 800, color: "#fff", background: color, cursor: "pointer" },
+      resetBtnStyle: { border: "1px solid #d3dae4", background: "#f6f8fb", color: "#4b5768", borderRadius: "6px", padding: "8px 10px", fontSize: "12px", fontWeight: 700, cursor: "pointer" },
+      onApply, onReset,
+      log: panel.log || [],
+      logEmpty: !(panel.log || []).length,
+      memoBoxStyle: { flex: 1, minHeight: "120px", maxHeight: "220px", overflowY: "auto", border: "1px solid #eef1f6", borderRadius: "7px", padding: "8px 10px", background: "#fbfcfe" }
+    };
+  }
+
+  treeOf(g, vasMap, st) {
+    const cell = { display: "flex", alignItems: "center", padding: "5px 8px", borderBottom: "1px solid #eef1f6", minWidth: 0 };
+    let rowCursor = 2;
+    const plans = [];
+    const ord = g.rows.map((r, i) => ({ r, i })).sort((a, b) =>
+      (a.r.planIdx - b.r.planIdx) ||
+      (JOINS.indexOf(a.r.joinType) - JOINS.indexOf(b.r.joinType)) ||
+      (DISCS.indexOf(a.r.discountType) - DISCS.indexOf(b.r.discountType))
+    );
+    const seen = {};
+    ord.forEach(({ r, i }) => {
+      // 요금제당 4행은 항상 번호이동(공시/선약) → 기기변경(공시/선약) 고정 조합으로 표시
+      const pos = seen[r.planIdx] = (seen[r.planIdx] === undefined ? 0 : seen[r.planIdx] + 1);
+      const combo = COMBOS[pos] || { join: r.joinType, disc: r.discountType };
+      const joinType = combo.join, discountType = combo.disc;
+      let p = plans.find(x => x.key === r.planIdx);
+      if (!p) { plans.push(p = { key: r.planIdx, plan: r.plan, joins: [] }); }
+      let j = p.joins.find(x => x.key === joinType);
+      if (!j) { p.joins.push(j = { key: joinType, joinType: joinType, rows: [] }); }
+      const bg = r.planIdx % 2 ? "#fbfcfe" : "#fff";
+      const rowN = rowCursor++;
+      j.rows.push({
+        discountType: discountType,
+        rebate: r.rebate, addSupport: r.addSupport, memo: r.memo,
+        cellStyle: Object.assign({}, cell, { background: bg, gridRow: rowN, gridColumn: 5 }),
+        cellStyleReb: Object.assign({}, cell, { background: "#f7faff", gridRow: rowN, gridColumn: 6 }),
+        cellStyleAdd: Object.assign({}, cell, { background: "#f8fdfa", gridRow: rowN, gridColumn: 7 }),
+        cellStyleMemo: Object.assign({}, cell, { background: bg, gridRow: rowN, gridColumn: 8, padding: "5px 12px" }),
+        onRebate: e => this.updR(g.id, i, "rebate", this.n(e.target.value)),
+        onAddSupport: e => this.updR(g.id, i, "addSupport", this.n(e.target.value)),
+        onMemo: e => this.updR(g.id, i, "memo", e.target.value)
+      });
+      if (!j.startRow) { j.startRow = rowN; }
+      if (!p.startRow) { p.startRow = rowN; }
+    });
+    return plans.map((p, pi) => ({
+      plan: p.plan,
+      planCellStyle: {
+        gridRow: p.startRow + " / span " + p.joins.reduce((a, j) => a + j.rows.length, 0), gridColumn: 1,
+        display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0",
+        padding: "5px 0 5px 12px", borderBottom: "1px solid #eef1f6",
+        borderTop: pi > 0 ? "1px solid #dfe4ec" : "none",
+        background: p.key % 2 ? "#fbfcfe" : "#fff"
+      },
+      planTagStyle: {
+        fontSize: "12.5px", fontWeight: 800, letterSpacing: "-.3px",
+        color: CC[g.carrier], background: CBG[g.carrier], padding: "4px 9px", borderRadius: "5px", whiteSpace: "nowrap"
+      },
+      joins: p.joins.map((j, ji) => ({
+        joinType: j.joinType,
+        rows: j.rows,
+        joinCellStyle: {
+          gridRow: j.startRow + " / span " + j.rows.length, gridColumn: 3,
+          display: "flex", alignItems: "center", justifyContent: "flex-end",
+          padding: "5px 10px 5px 0", borderBottom: "1px solid #eef1f6",
+          borderTop: pi > 0 && ji === 0 ? "1px solid #dfe4ec" : "none",
+          background: p.key % 2 ? "#fbfcfe" : "#fff",
+          fontSize: "12px", fontWeight: 700, color: "#1a2330", whiteSpace: "nowrap"
+        },
+        braceStyle: {
+          gridRow: j.startRow + " / span " + j.rows.length, gridColumn: 4,
+          borderLeft: "1px solid #c9d3e0", borderTop: "1px solid #c9d3e0", borderBottom: "1px solid #c9d3e0",
+          width: "8px", margin: "9px 0", borderRadius: "3px 0 0 3px",
+          alignSelf: "stretch"
+        }
+      })),
+      trunkStyle: {
+        gridRow: p.startRow + " / span " + p.joins.reduce((a, j) => a + j.rows.length, 0), gridColumn: 2,
+        borderLeft: "1px solid #c9d3e0", borderTop: "1px solid #c9d3e0", borderBottom: "1px solid #c9d3e0",
+        width: "8px", margin: "14px 0 14px 8px", borderRadius: "3px 0 0 3px", alignSelf: "stretch"
+      }
+    }));
+  }
+
+  flat() {
+    const out = [];
+    const vById = {}; this.state.vendors.forEach(v => vById[v.name] = v);
+    this.state.groups.forEach(g => g.rows.forEach((r, i) => {
+      const vd = vById[g.vendor];
+      if (vd && vd.visible === false) return;
+      out.push({
+        gid: g.id, idx: i, carrier: g.carrier, device: g.device, vendor: g.vendor, vendorId: vd ? vd.id : null, price: g.price,
+        plan: r.plan, planIdx: r.planIdx, joinType: r.joinType, discountType: r.discountType,
+        // 부가서비스 조건은 거래처(vd)에 등록된 항목을 그대로 따른다 - 거래처 관리에서 추가/수정/삭제하면 조회에 즉시 반영됨
+        rebate: r.rebate, vas: vd ? (vd.vas || []).map(x => x.id) : [], addSupport: r.addSupport, polDeduct: r.polDeduct, addNote: r.addNote, memo: r.memo,
+        vendorNote: vd ? vd.note : ""
+      });
+    }));
+    return out;
+  }
+
+  tabBtn(id, label, active) {
+    return {
+      label,
+      onClick: () => this.setState({ tab: id }),
+      style: {
+        border: "none", cursor: "pointer", padding: "11px 18px 12px", fontSize: "13px", fontWeight: 700,
+        letterSpacing: "-.3px", borderRadius: "8px 8px 0 0",
+        background: active ? "#eef1f5" : "rgba(255,255,255,.12)",
+        color: active ? "#1f6feb" : "rgba(255,255,255,.88)"
+      }
+    };
+  }
+
+  segBtn(field, value, label) {
+    const active = this.state.f[field] === value;
+    return {
+      label,
+      onClick: () => this.setState(s => ({ f: Object.assign({}, s.f, { [field]: value }), rowLimit: 50 })),
+      style: {
+        border: active ? "1px solid #1f6feb" : "1px solid #d3dae4",
+        background: active ? "#1f6feb" : "#fff",
+        color: active ? "#fff" : "#4b5768",
+        padding: "7px 2px", borderRadius: "6px", fontSize: "11.5px", fontWeight: 700, cursor: "pointer",
+        letterSpacing: "-.2px"
+      }
+    };
+  }
+
+  chip(carrier) {
+    return {
+      display: "inline-block", padding: "2px 7px", borderRadius: "4px", fontSize: "11px", fontWeight: 800,
+      color: CC[carrier] || "#4b5768", background: CBG[carrier] || "#f0f2f6", letterSpacing: "-.2px"
+    };
+  }
+
+  changeSitePw() {
+    const next = this.state.sitePwNext || "", confirm = this.state.sitePwConfirm || "";
+    if (next.length < 4) { this.setState({ sitePwMsg: { ok: false, text: "4자 이상 입력하세요." } }); return; }
+    if (next !== confirm) { this.setState({ sitePwMsg: { ok: false, text: "두 비밀번호가 일치하지 않습니다." } }); return; }
+    const db = window.__rebateDbV2;
+    if (!db) { this.setState({ sitePwMsg: { ok: false, text: "서버 연결이 없어 저장하지 못했습니다." } }); return; }
+    localStorage.setItem(SITE_PASSWORD_KEY, sitePwTag(next));
+    this.setState(s => ({ misc: Object.assign({}, MISC_DEFAULT, s.misc, { sitePassword: next }), sitePwNext: "", sitePwConfirm: "" }), () => {
+      Promise.resolve(this._syncMisc(db))
+        .then(() => this.setState({ sitePwMsg: { ok: true, text: "비밀번호가 변경되었습니다." } }))
+        .catch(() => this.setState({ sitePwMsg: { ok: false, text: "저장에 실패했습니다." } }));
+    });
+  }
+  onPwChange(e) { this.setState({ pwInput: e.target.value, pwError: false }); }
+  onSubmitPassword(e) {
+    e.preventDefault();
+    const cur = (this.state.misc && this.state.misc.sitePassword) || SITE_PASSWORD;
+    if ((this.state.pwInput || "") === cur) {
+      localStorage.setItem(SITE_PASSWORD_KEY, sitePwTag(cur));
+      this.setState({ unlocked: true, pwError: false, pwInput: "" });
+    } else {
+      this.setState({ pwError: true });
+    }
+  }
+
+  renderVals() {
+    const st = this.state, f = st.f;
+    const unlocked = !!st.unlocked;
+    const noticesArr = (st.misc && Array.isArray(st.misc.notices)) ? st.misc.notices : MISC_DEFAULT.notices.slice();
+    const activeNotices = noticesArr.filter(n => n && n.trim()).length ? noticesArr.filter(n => n && n.trim()) : MISC_DEFAULT.notices;
+    const sheet = st.vendors.some(v => v.name === st.sheet) ? st.sheet : (st.vendors[0] ? st.vendors[0].name : "");
+    const catalogNameOf = (carrier, id) => { const arr = (st.vasCatalog || {})[carrier || "SKT"] || []; const f = arr.find(c => c.id === id); const nc = (this._catNames = this._catNames || {}); if (f) { nc[id] = f.name; return f.name; } if (nc[id]) return nc[id]; for (const vv of st.vendors) { const it = (vv.vas || []).find(x => x.id === id && x.name); if (it) return it.name; } return "(삭제된 항목)"; };
+    const vasMapByVendor = {}; st.vendors.forEach(v => { const m = {}; (v.vas || []).forEach(x => m[x.id] = Object.assign({}, x, { name: catalogNameOf(v.carrier || "SKT", x.id) })); vasMapByVendor[v.id] = m; });
+    const all = this.flat();
+
+    const dedOf = p => this.r(this.n(p.polDeduct) + (p.vas || []).reduce((a, id) => {
+      const m = vasMapByVendor[p.vendorId] || {};
+      const v = m[id];
+      if (!v || !st.off[p.vendorId + "::" + id]) return a;
+      return a + this.n(v.deduct);
+    }, 0));
+    const vasAddOf = p => this.r((p.vas || []).reduce((a, id) => {
+      const m = vasMapByVendor[p.vendorId] || {};
+      const v = m[id];
+      if (!v || st.off[p.vendorId + "::" + id]) return a;
+      return a + this.n(v.add);
+    }, 0));
+
+    const matched = all.filter(p =>
+      (f.carrier === "전체" || p.carrier === f.carrier) &&
+      (f.device === "전체" || p.device === f.device) &&
+      (f.plan === "전체" || p.plan === f.plan) &&
+      (f.join === "전체" || p.joinType === f.join) &&
+      (f.disc === "전체" || p.discountType === f.disc) &&
+      (f.vendor === "전체" || p.vendor === f.vendor) &&
+      !(st.planRankOff || {})[this.planKey(p.carrier, p.planIdx, p.vendor)]
+    ).map(p => {
+      const ded = dedOf(p);
+      const vasAdd = vasAddOf(p);
+      const promoOn = this.isPromoOn(this.promoKey(p.carrier, p.planIdx, p.joinType, p.discountType, p.vendor));
+      const effAdd = promoOn ? this.n(p.addSupport) : 0;
+      return Object.assign({}, p, { ded, vasAdd, promoOn, effAdd, finalAmt: this.r(this.n(p.rebate) + effAdd + vasAdd - ded) });
+    }).sort((a, b) => b.finalAmt - a.finalAmt);
+
+    const openDetail = (p, rankLabel) => this.setState({ selected: Object.assign({}, p, { rankLabel }) });
+
+    const rowLimit = st.rowLimit || 50;
+    const rows = matched.slice(0, rowLimit).map((p, i) => ({
+      rank: i + 1,
+      onClick: () => openDetail(p, (i + 1) + "순위"),
+      carrier: p.carrier, device: p.device, vendor: p.vendor, plan: p.plan, joinType: p.joinType,
+      discLabel: p.discountType === "공시지원금" ? "공시지원금" : "선택약정",
+      rebate: this.n(p.rebate),
+      vasLabel: (p.vas || []).length ? (p.vas || []).map(id => { const m = vasMapByVendor[p.vendorId] || {}; const vv = m[id]; const label = (vv ? vv.name : id) + (vv && vv.term ? " (" + vv.term + ")" : ""); return label + (st.off[p.vendorId + "::" + id] ? " (미유치)" : ""); }).join(", ") : "조건 없음",
+      dedLabel: p.ded ? "−" + p.ded : "0",
+      supLabel: !p.promoOn ? "미적용" : (p.effAdd ? "+" + p.effAdd : "0"),
+      final: p.finalAmt,
+      memo: [p.vendorNote, p.addNote, p.memo].filter(Boolean).join(" / ") || "—",
+      chipStyle: this.chip(p.carrier),
+      rowStyle: { background: i % 2 ? "#fbfcfe" : "#fff", cursor: "pointer" },
+      tdRank: {
+        padding: "9px 8px", borderBottom: "1px solid #eef1f6", textAlign: "center", fontWeight: 800,
+        fontSize: i < 3 ? "16px" : "15px", color: i < 3 ? "#1f6feb" : "#9aa4b3"
+      },
+      tdDed: { padding: "9px 8px", borderBottom: "1px solid #eef1f6", textAlign: "center", fontWeight: 700, fontSize: "14.5px", color: p.ded ? "#c2410c" : "#c3ccd8", fontVariantNumeric: "tabular-nums" },
+      tdFinal: { padding: "9px 18px 9px 10px", borderBottom: "1px solid #eef1f6", textAlign: "right", fontWeight: 900, fontSize: "20px", color: "#0b3fa8", background: "#f7faff", fontVariantNumeric: "tabular-nums" }
+    }));
+    const moreCount = Math.max(0, matched.length - rowLimit);
+    const hasMore = moreCount > 0;
+    const onShowMore = () => this.setState(s => ({ rowLimit: (s.rowLimit || 50) + 100 }));
+    const moreLabel = "더보기 (" + Math.min(moreCount, 100) + "건 더, 총 " + matched.length + "건 중 " + Math.min(rowLimit, matched.length) + "건 표시)";
+
+    const top3 = matched.slice(0, 3).map((p, i) => ({
+      rankLabel: i === 0 ? "1순위 추천" : (i + 1) + "순위",
+      onClick: () => openDetail(p, i === 0 ? "1순위 추천" : (i + 1) + "순위"),
+      carrier: p.carrier, device: p.device, vendor: p.vendor, plan: p.plan,
+      joinType: p.joinType, discountType: p.discountType === "공시지원금" ? "공시" : "선약",
+      rebate: this.n(p.rebate), addSupport: p.effAdd, final: p.finalAmt,
+      dedLabel: p.ded ? "−" + p.ded : "0",
+      dedStyle: { fontSize: "15px", fontWeight: 800, color: p.ded ? "#c2410c" : "#c3ccd8", fontVariantNumeric: "tabular-nums" },
+      cardStyle: {
+        background: "#fff", borderRadius: "10px", padding: "11px 16px 10px", cursor: "pointer",
+        border: "2px solid #1f6feb",
+        boxShadow: i === 0 ? "0 3px 14px rgba(31,111,235,.14)" : "none"
+      },
+      badgeStyle: {
+        fontSize: "12px", fontWeight: 800, padding: "3px 11px", borderRadius: "12px", letterSpacing: "-.2px",
+        background: i === 0 ? "#1f6feb" : "#eef1f5", color: i === 0 ? "#fff" : "#6b7788"
+      },
+      carrierStyle: this.chip(p.carrier)
+    }));
+
+    const devices = ["전체"].concat(Array.from(new Set(st.groups.map(g => g.device))).sort((a, b) => String(a).localeCompare(String(b), "ko")));
+    const planList = f.carrier === "전체"
+      ? CARRIERS.reduce((a, c) => a.concat(PLANS[c]), [])
+      : PLANS[f.carrier];
+    const vendorNames = st.vendors.filter(v => v.visible !== false).map(v => v.name);
+    const sheetVendor = st.vendors.filter(v => v.name === sheet)[0];
+    const sheetCarrier = sheetVendor ? (sheetVendor.carrier || "SKT") : CARRIERS[0];
+    const sheetCarriers = [sheetCarrier].concat(
+      CARRIERS.filter(c => c !== sheetCarrier && st.groups.some(g => g.vendor === sheet && g.carrier === c))
+    );
+
+    return {
+      isLocked: !unlocked,
+      isUnlocked: unlocked,
+      pwInput: st.pwInput || "",
+      pwError: !!st.pwError,
+      onPwChange: e => this.onPwChange(e),
+      onSubmitPassword: e => this.onSubmitPassword(e),
+      tabs: [
+        this.tabBtn("search", "리베이트 조회 · 순위", st.tab === "search"),
+        this.tabBtn("policy", "정책표 입력", st.tab === "policy"),
+        this.tabBtn("vendor", "거래처 관리", st.tab === "vendor"),
+        this.tabBtn("vasCatalog", "부가서비스 항목 관리", st.tab === "vasCatalog"),
+        this.tabBtn("deviceCatalog", "기종 관리", st.tab === "deviceCatalog"),
+        this.tabBtn("misc", "기타관리", st.tab === "misc")
+      ],
+      isSearch: st.tab === "search",
+      isPolicy: st.tab === "policy" && st.tabUnlocked,
+      isVendor: st.tab === "vendor" && st.tabUnlocked,
+      isVasCatalog: st.tab === "vasCatalog" && st.tabUnlocked,
+      isDeviceCatalog: st.tab === "deviceCatalog" && st.tabUnlocked,
+      isMisc: st.tab === "misc" && st.tabUnlocked,
+      stockTableRows: st.stockRows || [],
+      stockEmpty: !(st.stockRows || []).length,
+      stockCountLabel: (st.stockRows || []).length ? (st.stockRows.length + "건") : "",
+      onTriggerStockImport: this.triggerStockImport,
+      onStockImportFile: this.onStockImportFile,
+      stockFileInputRef: this.stockFileInputRef,
+      stockImportStatus: !!st.stockImportStatus,
+      stockImportStatusMsg: st.stockImportStatus ? st.stockImportStatus.msg : "",
+      stockImportStatusStyle: st.stockImportStatus ? {
+        margin: "0 16px 12px", padding: "8px 12px", borderRadius: "7px", fontSize: "11.5px", fontWeight: 700,
+        background: st.stockImportStatus.kind === "error" ? "#fdecea" : st.stockImportStatus.kind === "busy" ? "#f6f8fb" : "#eafaf1",
+        color: st.stockImportStatus.kind === "error" ? "#c2410c" : st.stockImportStatus.kind === "busy" ? "#6b7788" : "#0f7b4a",
+        border: "1px solid " + (st.stockImportStatus.kind === "error" ? "#f3c9c0" : st.stockImportStatus.kind === "busy" ? "#e2e7ef" : "#bfe9d3")
+      } : {},
+      vendorCarrierCounts: CARRIERS.map(c => {
+        const vs = st.vendors.filter(v => (v.carrier || "SKT") === c);
+        const on = vs.filter(v => v.visible !== false).length;
+        return { carrier: c, on };
+      }),
+      vendorOffVendorCount: st.vendors.filter(v => v.visible === false).length,
+      vendorStatusRows: st.vendors.slice().sort((a, b) => {
+        const ac = CARRIERS.indexOf(a.carrier || "SKT"), bc = CARRIERS.indexOf(b.carrier || "SKT");
+        if (ac !== bc) return ac - bc;
+        const av = a.visible !== false, bv = b.visible !== false;
+        if (av !== bv) return av ? -1 : 1;
+        return (a.name || "").localeCompare(b.name || "");
+      }).map(v => {
+        const on = v.visible !== false;
+        return {
+          name: v.name, carrier: v.carrier || "SKT",
+          statusLabel: on ? "운영중" : "미운영중",
+          statusStyle: "font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:10px; white-space:nowrap; " + (on ? "background:#eafaf0; color:#1b8a55" : "background:#f2f3f6; color:#8b95a6")
+        };
+      }),
+      openStockRows: (() => {
+        const rows = (st.stockRows || []).filter(r => (r.devStatus || "").indexOf("개봉") !== -1);
+        const sort = st.stockSort;
+        if (sort) {
+          rows.sort((a, b) => {
+            const av = (a[sort.key] || "").toString();
+            const bv = (b[sort.key] || "").toString();
+            return av.localeCompare(bv, "ko") * sort.dir;
+          });
+        }
+        return rows.map(r => Object.assign({}, r, { onClick: () => this.setState({ stockSelected: r }) }));
+      })(),
+      openStockEmpty: !(st.stockRows || []).filter(r => (r.devStatus || "").indexOf("개봉") !== -1).length,
+      openStockTotal: (st.stockRows || []).filter(r => (r.devStatus || "").indexOf("개봉") !== -1).length,
+      onSortStockCarrier: () => this.setState(s => ({ stockSort: (s.stockSort && s.stockSort.key === "carrier") ? { key: "carrier", dir: -s.stockSort.dir } : { key: "carrier", dir: 1 } })),
+      onSortStockModel: () => this.setState(s => ({ stockSort: (s.stockSort && s.stockSort.key === "model") ? { key: "model", dir: -s.stockSort.dir } : { key: "model", dir: 1 } })),
+      stockSortCarrierArrow: (st.stockSort && st.stockSort.key === "carrier") ? (st.stockSort.dir === 1 ? " ▲" : " ▼") : "",
+      stockSortModelArrow: (st.stockSort && st.stockSort.key === "model") ? (st.stockSort.dir === 1 ? " ▲" : " ▼") : "",
+      stockUpdatedLabel: st.stockUpdatedAt ? new Date(st.stockUpdatedAt).toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "",
+      isPolicyLocked: st.tab === "policy" && !st.tabUnlocked,
+      isVendorLocked: st.tab === "vendor" && !st.tabUnlocked,
+      isVasCatalogLocked: st.tab === "vasCatalog" && !st.tabUnlocked,
+      isDeviceCatalogLocked: st.tab === "deviceCatalog" && !st.tabUnlocked,
+      isMiscLocked: st.tab === "misc" && !st.tabUnlocked,
+      showSaveBar: st.tab !== "search",
+
+      misc: Object.assign({}, MISC_DEFAULT, st.misc, {
+        onTitle: e => this.setState(s => ({ misc: Object.assign({}, MISC_DEFAULT, s.misc, { title: e.target.value }) })),
+        onCreator: e => this.setState(s => ({ misc: Object.assign({}, MISC_DEFAULT, s.misc, { creator: e.target.value }) })),
+        onVersion: e => this.setState(s => ({ misc: Object.assign({}, MISC_DEFAULT, s.misc, { version: e.target.value }) })),
+        onPolicyHelp: e => this.setState(s => ({ misc: Object.assign({}, MISC_DEFAULT, s.misc, { policyHelp: e.target.value }) }))
+      }),
+      sitePw: {
+        next: st.sitePwNext || "",
+        confirm: st.sitePwConfirm || "",
+        onNext: e => this.setState({ sitePwNext: e.target.value, sitePwMsg: null }),
+        onConfirm: e => this.setState({ sitePwConfirm: e.target.value, sitePwMsg: null }),
+        onSubmit: () => this.changeSitePw(),
+        hasMsg: !!st.sitePwMsg,
+        msg: st.sitePwMsg ? st.sitePwMsg.text : "",
+        msgStyle: { fontSize: "11.5px", fontWeight: 700, color: st.sitePwMsg && st.sitePwMsg.ok ? "#047857" : "#c2410c" }
+      },
+      noticeItems: (noticesArr.length ? noticesArr : [""]).map((val, i) => ({
+        value: val,
+        onChange: e => this.setState(s => {
+          const arr = ((s.misc && s.misc.notices) || noticesArr).slice();
+          arr[i] = e.target.value;
+          return { misc: Object.assign({}, MISC_DEFAULT, s.misc, { notices: arr }) };
+        }),
+        onDelete: () => this.setState(s => {
+          const arr = ((s.misc && s.misc.notices) || noticesArr).slice();
+          arr.splice(i, 1);
+          return { misc: Object.assign({}, MISC_DEFAULT, s.misc, { notices: arr }), noticeIdx: 0 };
+        })
+      })),
+      onAddNotice: () => this.setState(s => {
+        const arr = ((s.misc && s.misc.notices) || noticesArr).slice();
+        arr.push("");
+        return { misc: Object.assign({}, MISC_DEFAULT, s.misc, { notices: arr }) };
+      }),
+      noticeText: activeNotices[(st.noticeIdx || 0) % activeNotices.length] || "",
+      noticeIdx: st.noticeIdx || 0,
+      noticeModalOpen: !!st.noticeModalOpen,
+      onOpenNotice: () => this.setState({ noticeModalOpen: true }),
+      onCloseNotice: () => this.setState({ noticeModalOpen: false }),
+      stopClick: e => e.stopPropagation(),
+      noticeModalItems: activeNotices.map((text, i) => ({ idx: i + 1 + ".", text })),
+      usageHelpOpen: !!st.usageHelpOpen,
+      usageHelpText: (st.misc && st.misc.policyHelp) || MISC_DEFAULT.policyHelp,
+      onOpenUsageHelp: () => this.setState({ usageHelpOpen: true }),
+      onCloseUsageHelp: () => this.setState({ usageHelpOpen: false }),
+
+      lock: {
+        value: st.pwDraft,
+        error: st.pwError,
+        onChange: e => this.setState({ pwDraft: e.target.value, pwError: false }),
+        onKeyDown: e => { if (e.key === "Enter") this.submitPw(); },
+        onSubmit: () => this.submitPw(),
+        wrapStyle: { display: "flex", justifyContent: "center", padding: "60px 20px" },
+        boxStyle: { width: "320px", background: "#fff", border: "1px solid #dfe4ec", borderRadius: "10px", padding: "22px", display: "flex", flexDirection: "column", gap: "10px" },
+        inputStyle: { border: "1px solid " + (st.pwError ? "#e6a3a3" : "#d3dae4"), borderRadius: "6px", padding: "9px 10px", fontSize: "13px" },
+        btnStyle: { border: "none", background: "#1f6feb", color: "#fff", padding: "9px 0", borderRadius: "7px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }
+      },
+
+      onManualSave: this.manualSave,
+      saveModalOpen: st.saveStatus !== "idle",
+      saveIsSaving: st.saveStatus === "saving",
+      saveIsSaved: st.saveStatus === "saved",
+      saveIsError: st.saveStatus === "error",
+      saveModalTitle: st.saveStatus === "saving" ? "저장중" : st.saveStatus === "saved" ? "완료" : "저장 실패",
+      saveModalSub: st.saveStatus === "saving" ? "창을 닫거나 이동하지 마세요." : st.saveStatus === "saved" ? "저장이 완료되었습니다." : "다시 시도해주세요.",
+      closeSaveModal: () => this.setState({ saveStatus: "idle" }),
+      saveBtnLabel: st.saveStatus === "saving" ? "저장 중..." : "지금 저장",
+      saveBtnStyle: {
+        border: "1px solid rgba(255,255,255,.5)", background: st.saveStatus === "saving" ? "rgba(255,255,255,.15)" : "rgba(255,255,255,.95)",
+        color: st.saveStatus === "saving" ? "#fff" : "#1f6feb", fontSize: "12px", fontWeight: "800", padding: "6px 12px",
+        borderRadius: "6px", cursor: st.saveStatus === "saving" ? "default" : "pointer"
+      },
+      saveStatusText: st.saveStatus === "saved" ? "저장됨" : st.saveStatus === "error" ? "저장 실패 - 다시 시도" : "",
+      saveStatusStyle: { fontSize: "12px", fontWeight: "700", color: st.saveStatus === "error" ? "#ffd0d0" : "rgba(255,255,255,.85)" },
+
+      carrierOpts: ["전체"].concat(CARRIERS).map(c => this.segBtn("carrier", c, c)),
+      joinOpts: ["전체"].concat(JOINS).map(c => this.segBtn("join", c, c)),
+      discOpts: [["전체", "전체"], ["공시지원금", "공시"], ["선택약정", "선약"]].map(x => this.segBtn("disc", x[0], x[1])),
+      device: f.device, plan: f.plan, vendor: f.vendor,
+      deviceOpts: devices, planOpts: ["전체"].concat(planList), vendorOpts: ["전체"].concat(vendorNames),
+      onDevice: e => this.setState(s => ({ f: Object.assign({}, s.f, { device: e.target.value }), rowLimit: 50 })),
+      onPlan: e => this.setState(s => ({ f: Object.assign({}, s.f, { plan: e.target.value }), rowLimit: 50 })),
+      onVendor: e => this.setState(s => ({ f: Object.assign({}, s.f, { vendor: e.target.value }), rowLimit: 50 })),
+      onReset: () => this.setState({ f: { carrier: "전체", device: "전체", plan: "전체", join: "전체", disc: "전체", vendor: "전체" }, off: {}, rowLimit: 50 }),
+
+      vasAllOn: () => this.setState(s => {
+        const nextOff = Object.assign({}, s.off);
+        st.vendors.filter(v => (f.vendor === "전체" || v.name === f.vendor) && (f.carrier === "전체" || v.carrier === f.carrier))
+          .forEach(v => (v.vas || []).forEach(x => { delete nextOff[v.id + "::" + x.id]; }));
+        return { off: nextOff };
+      }),
+      vasAllOff: () => this.setState(s => {
+        const nextOff = Object.assign({}, s.off);
+        st.vendors.filter(v => (f.vendor === "전체" || v.name === f.vendor) && (f.carrier === "전체" || v.carrier === f.carrier))
+          .forEach(v => (v.vas || []).forEach(x => { nextOff[v.id + "::" + x.id] = true; }));
+        return { off: nextOff };
+      }),
+      vasToggles: (() => {
+        const flat = st.vendors
+          .filter(v => f.vendor === "전체" || v.name === f.vendor)
+          .filter(v => f.carrier === "전체" || v.carrier === f.carrier)
+          .reduce((a, v) => a.concat((v.vas || []).map(x => Object.assign({}, x, { name: catalogNameOf(v.carrier || "SKT", x.id), vendorId: v.id, carrier: v.carrier || "SKT" }))), []);
+        // 같은 항목(통신사+이름)이 여러 거래처에 걸쳐 있으면 한 줄로 합치고, 토글은 해당 항목의
+        // 모든 거래처 항목에 함께 적용한다 - 그렇지 않으면 목록에 동일 항목이 여러 번 나타난다.
+        const groups = {};
+        const order = [];
+        flat.forEach(x => {
+          const gkey = x.carrier + "::" + x.name;
+          if (!groups[gkey]) { groups[gkey] = { name: x.name, deduct: x.deduct, add: x.add, keys: [] }; order.push(gkey); }
+          groups[gkey].keys.push(x.vendorId + "::" + x.id);
+        });
+        return order.map(gkey => {
+          const g = groups[gkey];
+          const on = g.keys.some(k => !st.off[k]);
+          return {
+            name: g.name, mark: on ? "✓" : "",
+            onClick: () => this.setState(s => {
+              const nextOff = Object.assign({}, s.off);
+              g.keys.forEach(k => { if (on) nextOff[k] = true; else delete nextOff[k]; });
+              return { off: nextOff };
+            }),
+            style: {
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px",
+              padding: "8px 6px", cursor: "pointer", borderRadius: "6px",
+              background: on ? "transparent" : "#fff6ed", color: "#1a2330"
+            },
+            box: {
+              width: "17px", height: "17px", borderRadius: "4px", flex: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "11px", fontWeight: 800, color: "#fff",
+              background: on ? "#1e9e5a" : "#fff", border: on ? "1px solid #1e9e5a" : "1px solid #d3dae4"
+            },
+            amtLabel: on ? (this.n(g.add) ? "+" + this.n(g.add) + "만원" : "유치") : "−" + this.n(g.deduct) + "만원",
+            amtStyle: { fontSize: "11.5px", fontWeight: 800, color: on ? "#9aa4b3" : "#c2410c", fontVariantNumeric: "tabular-nums" }
+          };
+        });
+      })(),
+      dedTotal: this.r(st.vendors.reduce((a, v) => a + (v.vas || []).reduce((b, x) => {
+        const key = v.id + "::" + x.id;
+        return st.off[key] ? b + this.n(x.deduct) : b;
+      }, 0), 0)),
+
+      rows, top3, resultCount: matched.length, empty: matched.length === 0,
+      hasMore, onShowMore, moreLabel,
+
+      joinList: JOINS, discList: DISCS, vendorNames,
+      sheetSummary: "이 시트 기종 " + st.groups.filter(g => g.vendor === sheet).length + "개 · 전체 거래처 " + st.vendors.length + "곳",
+      importInputRef: this.fileInputRef,
+      onImportFile: this.onImportFile,
+      onTriggerImport: this.triggerImport,
+      onTruncateRebate: this.truncateRebate,
+      importStatus: !!st.importStatus,
+      importStatusMsg: st.importStatus ? st.importStatus.msg : "",
+      importStatusStyle: st.importStatus ? {
+        margin: "0 16px 12px", padding: "8px 12px", borderRadius: "7px", fontSize: "11.5px", fontWeight: 700,
+        background: st.importStatus.kind === "error" ? "#fdecea" : st.importStatus.kind === "busy" ? "#f6f8fb" : "#eafaf1",
+        color: st.importStatus.kind === "error" ? "#c2410c" : st.importStatus.kind === "busy" ? "#6b7788" : "#0f7b4a",
+        border: "1px solid " + (st.importStatus.kind === "error" ? "#f3c9c0" : st.importStatus.kind === "busy" ? "#e2e7ef" : "#bfe9d3")
+      } : {},
+      sheetTabs: st.vendors.map(v => {
+        const on = v.name === sheet;
+        const vis = v.visible !== false;
+        return {
+          label: v.name,
+          count: st.groups.filter(g => g.vendor === v.name).length,
+          style: {
+            display: "flex", alignItems: "center", gap: "7px", cursor: "pointer", flex: "none",
+            padding: on ? "9px 16px 10px" : "7px 14px 8px",
+            border: "1px solid #e2e7ef",
+            borderBottom: on ? "1px solid #f6f8fb" : "1px solid #e2e7ef",
+            borderTop: "3px solid " + (on ? "#1f6feb" : "transparent"),
+            borderRadius: "7px 7px 0 0", marginBottom: "-1px",
+            background: on ? "#f6f8fb" : "#e4e9f1",
+            color: vis ? (on ? "#1a2330" : "#7b8698") : "#a9b1c0",
+            opacity: vis ? 1 : .7,
+            fontSize: "12.5px", fontWeight: 800, letterSpacing: "-.3px", whiteSpace: "nowrap"
+          },
+          countStyle: {
+            fontSize: "10.5px", fontWeight: 700, padding: "1px 6px", borderRadius: "9px",
+            background: on ? "#eaf1fe" : "#d7deea", color: on ? "#1f6feb" : "#8b95a6",
+            fontVariantNumeric: "tabular-nums"
+          },
+          toggleTitle: vis ? "조회에 노출 중 · 클릭하면 숨김" : "조회에서 숨김 · 클릭하면 노출",
+          toggleTrackStyle: {
+            display: "inline-flex", alignItems: "center", flex: "none", cursor: "pointer",
+            width: "26px", height: "14px", borderRadius: "7px", padding: "1.5px", boxSizing: "border-box",
+            background: vis ? "#2e9e5b" : "#c3cad6", transition: "background .15s ease"
+          },
+          toggleThumbStyle: {
+            width: "11px", height: "11px", borderRadius: "50%", background: "#fff",
+            boxShadow: "0 1px 2px rgba(0,0,0,.25)", transition: "transform .15s ease",
+            transform: vis ? "translateX(12px)" : "translateX(0)"
+          },
+          onToggleVisible: e => { e.stopPropagation(); this.setState(s => ({ vendors: s.vendors.map(x => x.id === v.id ? Object.assign({}, x, { visible: !(x.visible !== false) }) : x) })); },
+          onClick: () => this.setState({ sheet: v.name })
+        };
+      }),
+
+      applyCards: ["add", "ded"].map(k => this.buildApplyCard(k, st, sheet, sheetCarrier, st.groups.filter(g => g.vendor === sheet && g.carrier === sheetCarrier))),
+
+      carrierSections: sheetCarriers.map(c => ({
+        carrier: c,
+        chipStyle: this.chip(c),
+        isOwn: c === sheetCarrier,
+        addLabel: c + " 기종 추가",
+        count: st.groups.filter(g => g.vendor === sheet && g.carrier === c).length,
+        onAdd: () => this.setState(s => ({
+          groups: s.groups.concat([{
+            id: "g" + Date.now(), carrier: c, device: "새 기종", vendor: sheet, price: 0,
+            rows: buildRows(c, ["", "", "", 0, [0, 0, 0, 0], 0, []])
+          }])
+        })),
+        mx: this.matrixOf(c, sheet, st.groups.filter(g => g.vendor === sheet && g.carrier === c), st)
+      })),
+
+      vendorRows: st.vendors.map(v => {
+        const own = st.groups.filter(g => g.vendor === v.name);
+        const rebs = own.reduce((a, g) => a.concat(g.rows.map(r => this.n(r.rebate))), []);
+        const avg = rebs.length ? Math.round(rebs.reduce((a, x) => a + x, 0) / rebs.length) : 0;
+        const carrierCode = v.carrier || "SKT";
+        const catalog = (st.vasCatalog[carrierCode] || []);
+        const usedIds = new Set((v.vas || []).map(x => x.id));
+        const vasList = (v.vas || []).map(x => {
+          const orphan = !catalog.some(c => c.id === x.id);
+          const opts = catalog.filter(c => c.id === x.id || !usedIds.has(c.id)).map(c => ({ value: c.id, label: c.name }));
+          if (orphan) opts.unshift({ value: x.id, label: "(삭제된 항목) " + catalogNameOf(carrierCode, x.id) });
+          return {
+            selectedId: x.id, catalogOptions: opts, deduct: x.deduct === undefined || x.deduct === null || x.deduct === "" ? "0" : String(x.deduct), add: x.add === undefined || x.add === null || x.add === "" ? "0" : String(x.add), term: x.term,
+            onSelect: e => this.updVendorVas(v.id, x.id, "id", e.target.value),
+            onDeduct: e => this.updVendorVas(v.id, x.id, "deduct", e.target.value),
+            onAdd: e => this.updVendorVas(v.id, x.id, "add", e.target.value),
+            onTerm: e => this.updVendorVas(v.id, x.id, "term", e.target.value),
+            onDelete: () => this.delVendorVas(v.id, x.id)
+          };
+        });
+        return {
+          name: v.name, manager: v.manager, phone: v.phone, settle: v.settle, note: v.note,
+          count: own.length, avg, vasList, hasVas: vasList.length > 0, noVas: vasList.length === 0,
+          onAddVas: () => this.addVendorVas(v.id),
+          carrier: v.carrier || "SKT",
+          carrierChip: this.chip(v.carrier || "SKT"),
+          carrierOpts: CARRIERS.map(c => {
+            const on = (v.carrier || "SKT") === c;
+            return {
+              label: c,
+              onClick: () => this.updVendor(v.id, "carrier", c),
+              style: {
+                padding: "6px 0", borderRadius: "5px", fontSize: "12px", fontWeight: 800, cursor: "pointer",
+                border: "1px solid " + (on ? (CC[c] || "#1f6feb") : "#e2e7ef"),
+                background: on ? (CBG[c] || "#eaf1fe") : "#fff",
+                color: on ? (CC[c] || "#1f6feb") : "#8b95a6",
+                letterSpacing: "-.2px"
+              }
+            };
+          }),
+          onName: e => this.updVendor(v.id, "name", e.target.value),
+          onManager: e => this.updVendor(v.id, "manager", e.target.value),
+          onPhone: e => this.updVendor(v.id, "phone", e.target.value),
+          onSettle: e => this.updVendor(v.id, "settle", e.target.value),
+          onNote: e => this.updVendor(v.id, "note", e.target.value),
+          deleteBtnLabel: st.confirmDeleteVendor === v.id ? "확인?" : "×",
+          deleteBtnStyle: st.confirmDeleteVendor === v.id
+            ? { border: "1px solid #b04141", background: "#b04141", color: "#fff", flex: "none", height: "24px", padding: "0 8px", borderRadius: "6px", fontSize: "11px", fontWeight: 700, lineHeight: 1, cursor: "pointer" }
+            : { border: "1px solid #e6d0d0", background: "#fff", color: "#b04141", width: "24px", height: "24px", flex: "none", borderRadius: "6px", fontSize: "14px", lineHeight: 1, cursor: "pointer" },
+          onDelete: () => {
+            if (st.confirmDeleteVendor !== v.id) { this.setState({ confirmDeleteVendor: v.id }); return; }
+            this.setState(s => ({
+              vendors: s.vendors.filter(x => x.id !== v.id),
+              groups: s.groups.filter(g => g.vendor !== v.name),
+              confirmDeleteVendor: null
+            }));
+          }
+        };
+      }),
+      onAddVendor: () => this.setState(s => ({ vendors: s.vendors.concat([{ id: "d" + Date.now(), name: "새 거래처", carrier: "SKT", manager: "", phone: "", settle: "", note: "", vas: [], visible: true }]) })),
+
+      vasCatalogRows: CARRIERS.map(carrier => {
+        const items = (st.vasCatalog[carrier] || []);
+        return {
+          carrier, chipStyle: this.chip(carrier), noItems: items.length === 0,
+          items: items.map(it => ({
+            name: it.name,
+            onName: e => this.updCatalogItem(carrier, it.id, e.target.value),
+            onDelete: () => this.delCatalogItem(carrier, it.id)
+          })),
+          onAdd: () => this.addCatalogItem(carrier)
+        };
+      }),
+      deviceCatalogRows: [(() => {
+        const items = (st.deviceCatalog || []);
+        return {
+          noItems: items.length === 0,
+          items: items.map(it => ({
+            name: it.name,
+            onName: e => this.updCatalogDevice(it.id, e.target.value),
+            onDelete: () => this.delCatalogDevice(it.id)
+          })),
+          onAdd: () => this.addCatalogDevice()
+        };
+      })()],
+
+      modalOpen: !!st.selected,
+      modal: st.selected ? this.buildModal(st.selected, vasMapByVendor) : null,
+      stockModalOpen: !!st.stockSelected,
+      stockModal: st.stockSelected,
+      onCloseStockModal: () => this.setState({ stockSelected: null })
+    };
+  }
+
+  buildModal(p, vasMapByVendor) {
+    const m = vasMapByVendor[p.vendorId] || {};
+    const polDed = this.r(this.n(p.polDeduct));
+    const vasDed = this.r((p.vas || []).reduce((a, id) => {
+      const v = m[id];
+      if (!v || !this.state.off[p.vendorId + "::" + id]) return a;
+      return a + this.n(v.deduct);
+    }, 0));
+    const ded = this.r(polDed + vasDed);
+    const vasAdd = (p.vas || []).reduce((a, id) => {
+      const v = m[id];
+      if (!v || this.state.off[p.vendorId + "::" + id]) return a;
+      return a + this.n(v.add);
+    }, 0);
+    const promoOn = this.isPromoOn(this.promoKey(p.carrier, p.planIdx, p.joinType, p.discountType, p.vendor));
+    const effAdd = promoOn ? this.n(p.addSupport) : 0;
+    const finalAmt = this.r(this.n(p.rebate) + effAdd + vasAdd - ded);
+    const vasList = (p.vas || []).map(id => {
+      const v = m[id];
+      const key = p.vendorId + "::" + id;
+      const off = !!this.state.off[key];
+      const on = !off;
+      return {
+        name: v ? v.name : id, term: v && v.term ? v.term : "",
+        statusLabel: off ? "미유치 (−" + this.n(v ? v.deduct : 0) + ")" : (v && this.n(v.add) ? "유치 (+" + this.n(v.add) + ")" : "유치"),
+        statusStyle: { fontSize: "11px", fontWeight: 800, color: off ? "#c2410c" : "#1f6feb", fontVariantNumeric: "tabular-nums" },
+        mark: on ? "✓" : "",
+        boxStyle: this.promoCheck(on, "16px"),
+        onToggle: () => this.setState(s => ({ off: Object.assign({}, s.off, { [key]: !s.off[key] }) })),
+        rowStyle: { display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", padding: "6px 0", cursor: "pointer" }
+      };
+    });
+    const memo = [p.vendorNote, p.addNote, p.memo].filter(Boolean).join(" / ");
+    const vendorRec = this.state.vendors.find(v => v.name === p.vendor);
+    const savedAt = vendorRec && vendorRec.savedAt;
+    const savedLabel = savedAt ? new Date(savedAt).toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }) + " 기준" : "저장 기록 없음";
+    return {
+      onClose: () => this.setState({ selected: null }),
+      stop: e => e.stopPropagation(),
+      savedLabel,
+      chipStyle: this.chip(p.carrier), carrier: p.carrier, rankLabel: p.rankLabel,
+      device: p.device, vendor: p.vendor, plan: p.plan, joinType: p.joinType,
+      discLabel: p.discountType === "공시지원금" ? "공시지원금" : "선택약정",
+      final: finalAmt, rebate: this.n(p.rebate),
+      supLabel: !promoOn ? "미적용" : (effAdd ? "+" + effAdd : "0"),
+      dedLabel: polDed ? "−" + polDed : "0",
+      dedStyle: { fontSize: "16px", fontWeight: 800, color: polDed ? "#c2410c" : "#c3ccd8", fontVariantNumeric: "tabular-nums" },
+      vasDedLabel: vasDed ? "−" + vasDed : "0",
+      vasDedStyle: { fontSize: "16px", fontWeight: 800, color: vasDed ? "#c2410c" : "#c3ccd8", fontVariantNumeric: "tabular-nums" },
+      vasAddLabel: vasAdd ? "+" + vasAdd : "0",
+      vasAddStyle: { fontSize: "16px", fontWeight: 800, color: vasAdd ? "#0f7b4a" : "#c3ccd8", fontVariantNumeric: "tabular-nums" },
+      vasList, noVas: vasList.length === 0,
+      memo, hasMemo: !!memo
+    };
+  }
+}
+</script>
+</body>
+</html>
